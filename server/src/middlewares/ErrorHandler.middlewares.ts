@@ -5,7 +5,7 @@ import { NotFoundError } from "../errors/NotFound.errors";
 import { BadRequestError } from "../errors/BadRequest.errors";
 import { UnauthorizedError } from "../errors/Unauthorized.errors";
 
-const genericHandler = (
+export const genericErrorHandler = (
   error: Error,
   req: Request,
   res: Response,

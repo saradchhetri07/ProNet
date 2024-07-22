@@ -10,17 +10,13 @@ const TABLE_NAME = "users";
  */
 export async function up(knex: Knex): Promise<void> {
   return knex.schema.createTable(TABLE_NAME, (table) => {
-    // table.bigIncrements();
-    table.uuid("id").primary().defaultTo(knex.raw("gen_random_uuid()"));
+    table.bigIncrements().primary();
 
     table.string("email", 255).unique().notNullable();
     table.string("password", 255).notNullable();
     table.string("name", 255).notNullable();
     table.string("profile_photo_url", 255).nullable();
     table.string("cover_photo_url", 255).nullable();
-    table.string("headline", 255).nullable();
-    table.text("summary").nullable();
-    table.string("contact_info", 255).nullable();
 
     table.timestamp("created_at").notNullable().defaultTo(knex.raw("now()"));
     table.timestamp("updated_at").defaultTo(knex.fn.now());
@@ -31,8 +27,6 @@ export async function up(knex: Knex): Promise<void> {
       .nullable()
       .references("id")
       .inTable(TABLE_NAME);
-
-    table.timestamp("updated_at").nullable();
 
     table
       .bigInteger("updated_by")

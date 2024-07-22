@@ -1,9 +1,9 @@
-import { User } from "../interfaces/user.interfaces";
-import * as UserServices from "./user.services";
+import { User } from "./../interfaces/user.interfaces";
+import * as UserModel from "../models/user.models";
 
 export const signUp = (body: Omit<User, "id">) => {
   try {
-    return UserServices.signUp(body);
+    return UserModel.UserModel.signUp(body);
   } catch (error) {
     throw error;
   }
@@ -11,7 +11,7 @@ export const signUp = (body: Omit<User, "id">) => {
 
 export const getUserByEmail = (email: string) => {
   try {
-    return UserServices.getUserByEmail(email);
+    return UserModel.UserModel.getUserByEmail(email);
   } catch (error) {
     throw error;
   }

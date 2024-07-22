@@ -1,7 +1,11 @@
 import express from "express";
 import rateLimiter from "express-rate-limit";
 import helmet from "helmet";
+import routers from "./routes/index.routes";
+import { fileStorage, fileFilter } from "./middlewares/multer.middlewares";
+
 import { config } from "./config";
+import multer from "multer";
 
 const app = express();
 
@@ -13,6 +17,7 @@ const limiter = rateLimiter({
 
 app.use(express.json());
 app.use(helmet());
+app.use(routers);
 app.use(limiter);
 
 app.listen(config.PORT, () => {
