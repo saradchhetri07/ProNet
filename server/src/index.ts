@@ -6,6 +6,7 @@ import { fileStorage, fileFilter } from "./middlewares/multer.middlewares";
 
 import { config } from "./config";
 import multer from "multer";
+import { genericErrorHandler } from "./middlewares/errorHandler.middlewares";
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use(express.json());
 app.use(helmet());
 app.use(routers);
 app.use(limiter);
+app.use(genericErrorHandler);
 
 app.listen(config.PORT, () => {
   console.log(`listening on port ${config.PORT}`);

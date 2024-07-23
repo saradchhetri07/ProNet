@@ -6,6 +6,7 @@ import express from "express";
 import { login, signUp } from "../controllers/auth.controllers";
 import { validateReqBody } from "../middlewares/validator.middlewares";
 import { upload } from "../middlewares/multer.middlewares";
+import { requestWrapper } from "../utils/requestWrapper.utils";
 
 const router = express();
 
@@ -18,8 +19,12 @@ router.post(
     },
   ]),
   validateReqBody(signUpUserBodySchema),
-  signUp
+  requestWrapper(signUp)
 );
-router.post("/login", validateReqBody(loginUserBodySchema), login);
+router.post(
+  "/login",
+  validateReqBody(loginUserBodySchema),
+  requestWrapper(login)
+);
 
 export default router;

@@ -10,9 +10,9 @@ export const signUp = (body: Omit<User, "id">) => {
 };
 
 export const getUserByEmail = (email: string) => {
-  try {
-    return UserModel.UserModel.getUserByEmail(email);
-  } catch (error) {
-    throw error;
-  }
+  return UserModel.UserModel.getUserByEmail(email);
+};
+
+export const getUsers = () => {
+  return UserModel.UserModel.getUsers();
 };

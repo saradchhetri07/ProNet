@@ -37,4 +37,20 @@ export class UserModel extends BaseModel {
       throw Error("Interval server error");
     }
   }
+
+  static async getUsers() {
+    try {
+      const users = await this.queryBuilder()
+        .select(
+          "users.email",
+          "users.name",
+          "users.profile_photo_url",
+          "users.cover_photo_url"
+        )
+        .table("users");
+      return users;
+    } catch (error) {
+      throw Error("Interval server error");
+    }
+  }
 }
