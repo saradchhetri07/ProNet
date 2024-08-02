@@ -1,21 +1,23 @@
+import { BadRequestError } from "../errors/BadRequest.errors";
 import { NotFoundError } from "../errors/NotFound.errors";
 import { User } from "../interfaces/user.interfaces";
 import * as UserServices from "./user.services";
 
-export const signUp = async (body: Omit<User, "id">) => {
-  const userExists = await UserServices.signUp(body);
+export const signUp = (body: Omit<User, "id">) => {
+  console.log(`inside auth services sign up`);
 
-  if (userExists) {
-    throw new NotFoundError("user with that email already exists");
-  }
-  return userExists;
+  return UserServices.signUp(body);
 };
 
-export const getUserByEmail = async (email: string) => {
+export const getUserByEmail = async (email: string, routes: string) => {
   const existingUser = await UserServices.getUserByEmail(email);
 
-  if (!existingUser) {
+  if (!existingUser && routes === "login") {
     throw new NotFoundError("user with that email doesn't exist");
   }
+  if (existingUser && routes === "signUp") {
+    throw new BadRequestError("user with that email already exists");
+  }
+
   return existingUser;
 };

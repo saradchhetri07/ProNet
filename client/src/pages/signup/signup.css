@@ -1,0 +1,12 @@
+.signUp-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.profilePhoto {
+  align-self: center;
+}
+
+.toast-custom {
+  @apply mr-1 mt-1 h-14 w-64 rounded-lg bg-primary text-center font-primary text-white shadow-lg;
+}

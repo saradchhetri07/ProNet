@@ -1,6 +1,6 @@
 import { Knex } from "knex";
 
-const TABLE_NAME = "jobs";
+const TABLE_NAME = "table_name";
 
 /**
  * Create table TABLE_NAME.
@@ -10,26 +10,25 @@ const TABLE_NAME = "jobs";
  */
 export async function up(knex: Knex): Promise<void> {
   return knex.schema.createTable(TABLE_NAME, (table) => {
-    table.bigIncrements("job_id").primary();
+    table.bigIncrements();
+
+    table.timestamp("created_at").notNullable().defaultTo(knex.raw("now()"));
+
     table
-      .bigInteger("user_id")
+      .bigInteger("created_by")
       .unsigned()
       .notNullable()
       .references("id")
-      .inTable("users")
-      .onDelete("CASCADE");
-    table.string("title", 255).notNullable();
+      .inTable(TABLE_NAME);
+
+    table.timestamp("updated_at").nullable();
+
     table
-      .bigInteger("company_id")
+      .bigInteger("updated_by")
       .unsigned()
-      .notNullable()
-      .references("company_id")
-      .inTable("companies")
-      .onDelete("CASCADE");
-    table.string("location", 255).notNullable();
-    table.string("employment_type", 255).notNullable();
-    table.timestamp("created_at").notNullable().defaultTo(knex.raw("now()"));
-    table.timestamp("updated_at").defaultTo(knex.fn.now());
+      .references("id")
+      .inTable(TABLE_NAME)
+      .nullable();
   });
 }
 

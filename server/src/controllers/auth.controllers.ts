@@ -15,7 +15,7 @@ export const login = async (
   next: NextFunction
 ) => {
   const { body } = req;
-  const existingUser = await AuthServices.getUserByEmail(body.email);
+  const existingUser = await AuthServices.getUserByEmail(body.email, "login");
 
   const isValidUser = await bcrypt.compare(
     body.password,
@@ -49,9 +49,10 @@ export const signUp = async (
   next: NextFunction
 ) => {
   const { body } = req;
+  console.log(`inside controlller`);
 
   //check if the user exist
-  await AuthServices.getUserByEmail(body.email);
+  await AuthServices.getUserByEmail(body.email, "signUp");
 
   const files: any = req.files;
   let profilePhotoLocalPath: string = "";
@@ -65,6 +66,8 @@ export const signUp = async (
   }
 
   const hashedPassword = await bcrypt.hash(body.password, 10);
+
+  console.log(`user is`, body);
 
   const users = await AuthServices.signUp({
     ...body,

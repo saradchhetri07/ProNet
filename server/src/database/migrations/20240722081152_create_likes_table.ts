@@ -19,6 +19,7 @@ export async function up(knex: Knex): Promise<void> {
       .references("post_id")
       .inTable("posts")
       .onDelete("CASCADE");
+
     table
       .bigInteger("user_id")
       .unsigned()
@@ -30,13 +31,6 @@ export async function up(knex: Knex): Promise<void> {
     table.timestamp("liked_at").notNullable().defaultTo(knex.raw("now()"));
 
     table.timestamp("created_at").notNullable().defaultTo(knex.raw("now()"));
-
-    table
-      .bigInteger("created_by")
-      .unsigned()
-      .notNullable()
-      .references("id")
-      .inTable("users");
 
     table.timestamp("updated_at").nullable();
 

@@ -7,6 +7,7 @@ import { login, signUp } from "../controllers/auth.controllers";
 import { validateReqBody } from "../middlewares/validator.middlewares";
 import { upload } from "../middlewares/multer.middlewares";
 import { requestWrapper } from "../utils/requestWrapper.utils";
+import { authenticate } from "../middlewares/auth.middlewares";
 
 const router = express();
 

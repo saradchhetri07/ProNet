@@ -4,6 +4,7 @@ import { ForbiddenError } from "../errors/Forbidden.errors";
 import { NotFoundError } from "../errors/NotFound.errors";
 import { BadRequestError } from "../errors/BadRequest.errors";
 import { UnauthorizedError } from "../errors/Unauthorized.errors";
+import { ServerError } from "../errors/ServerError.errors";
 
 export const genericErrorHandler = (
   error: Error,
@@ -29,7 +30,14 @@ export const genericErrorHandler = (
   }
 
   if (error instanceof BadRequestError) {
+    console.log(`came to throw bad request error`);
+
     return res.status(HTTPStatusCodes.BAD_REQUEST).json({
+      message: error.message,
+    });
+  }
+  if (error instanceof ServerError) {
+    return res.status(HTTPStatusCodes.INTERNAL_SERVER_ERROR).json({
       message: error.message,
     });
   }

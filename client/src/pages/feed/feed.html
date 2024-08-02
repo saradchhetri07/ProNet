@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../../style.css">
+    <link rel="stylesheet" href="./feed.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>News Feed</title>
+</head>
+
+<body>
+    <!-- header for the pronet app -->
+    <!-- Navbar HTML (navbar.html or a template component) -->
+    <div id="navbar-container">
+    </div>
+
+    <main class="main">
+        <div class="main__container">
+            <aside class="profile-summary">
+                <div class="profile-summary__background"></div>
+                <img src="../../assets/images/community_container.svg" alt="User" class="profile-summary__avatar">
+                <h2 class="profile-summary__name">John Doe</h2>
+                <p class="profile-summary__headline">Software Developer</p>
+                <!-- More profile summary content -->
+            </aside>
+
+            <section class="feed">
+                <div class="feed__post-form">
+                    <div class="flex items-start space-x-4">
+                        <img class="w-12 h-12 rounded-full" src="../../assets/images/Profile Default Icon.svg"
+                            alt="User avatar">
+                        <div class="flex-grow">
+                            <div class="border border-gray-300 rounded-lg overflow-hidden">
+                                <textarea id="post-content"
+                                    class="w-full p-3 focus:outline-none resize-none font-primary" rows="3"
+                                    placeholder="What do you want to talk about?"></textarea>
+
+                                <div id="image-preview" class="hidden p-3 border-t border-gray-200">
+                                    <img id="selected-image" class="w-full h-48 object-cover rounded" src=""
+                                        alt="Selected image">
+                                </div>
+
+                                <div class="flex justify-between items-center p-3 bg-gray-50 border-t border-gray-200">
+                                    <div class="flex space-x-2">
+                                        <input type="file" id="post-media" accept="image/*" class="hidden">
+                                        <button id="photo-button"
+                                            class="p-2 text-gray-600 hover:bg-gray-100 rounded transition-colors duration-200 flex items-center">
+                                            <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd"
+                                                    d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
+                                            <span class="text-sm">Photo</span>
+                                        </button>
+                                        <!-- ... other buttons ... -->
+                                    </div>
+                                    <button id="post-button"
+                                        class="px-4 py-1.5 bg-blue-600 text-white text-sm font-semibold rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200">
+                                        Post
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="feed-container" class="feed__posts">
+                </div>
+
+            </section>
+
+            <aside class="sidebar">
+                <section class="sidebar__section">
+                    <h2 class="sidebar__section-title">LinkedIn News</h2>
+                    <ul>
+                        <li class="sidebar__news-item">
+                            <h3 class="sidebar__news-title">Big tech company launches new product</h3>
+                            <p class="sidebar__news-meta">1d ago • 5,000 readers</p>
+                        </li>
+                        <!-- More news items -->
+                    </ul>
+                </section>
+                <!-- More sidebar sections -->
+            </aside>
+
+        </div>
+    </main>
+
+    <script type="module" src="./feed.ts"></script>
+</body>
+
+</html>

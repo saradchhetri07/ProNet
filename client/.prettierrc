@@ -1,0 +1,4 @@
+{
+  "plugins": ["prettier-plugin-tailwindcss"],
+  "extends": ["stylelint-config-tailwindcss"]
+}
