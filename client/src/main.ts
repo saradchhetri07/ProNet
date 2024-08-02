@@ -6,6 +6,8 @@ import { serverUrl } from "./constants/constant";
 
 class App {
   constructor() {
+    console.log(`cconssa`);
+
     this.init();
   }
 
@@ -30,6 +32,8 @@ class App {
       });
 
       if (response.data.valid) {
+        console.log("Token verification successful");
+
         localStorage.setItem("me", JSON.stringify(response.data));
         this.redirectToFeed();
       } else {
@@ -46,7 +50,7 @@ class App {
   }
 
   private redirectToHome() {
-    window.location.href = "http://localhost:5173/src/pages/feed/feed.html";
+    window.location.href = "http://localhost:5173/src/pages/home/home.html";
   }
 }
 

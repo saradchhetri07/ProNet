@@ -194,8 +194,8 @@ class ProfileManager {
               <label class="block text-gray-700 text-sm font-bold mb-2 font-primary" for="headline">
                 headline
               </label>
-              <textarea class="input-field shadow appearance-none border-2 rounded w-full py-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline font-primary" id="headline" type="text" placeholder="headline" rows="2" >
-              </textarea>
+              <textarea class="input-field shadow appearance-none border-2 rounded w-full py-2 text-black leading-tight focus:outline-none focus:shadow-outline font-primary" id="headline" placeholder="headline" type="text" rows="2" > </textarea>
+             
                 <span id="headline-error" class="post-error text-red-500 text-xs italic font-primary"></span>
             </div>
 
@@ -308,6 +308,7 @@ class ProfileManager {
       if (!response) {
         throw new Error("Network response was not ok");
       }
+
       this.posts = response.data;
       this.getMyPosts("5");
     } catch (error) {
@@ -381,12 +382,13 @@ class ProfileManager {
     ).value;
     const profileData = {
       headline,
-      // summary,
-      // industry,
-      // experience,
-      // currentCompany,
-      // currentPosition,
+      summary,
+      industry,
+      experience,
+      currentCompany,
+      currentPosition,
     };
+    console.log(`profile data is`, profileData);
   }
 
   private handleDocumentClick(event: MouseEvent): void {

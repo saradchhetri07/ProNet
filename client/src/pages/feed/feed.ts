@@ -359,7 +359,7 @@ class FeedForm {
         },
       });
     } catch (error) {
-      console.error("Error posting data:", error);
+      console.error("Error posting dfata:", error);
     }
   }
 }
