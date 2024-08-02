@@ -65,13 +65,10 @@ class JobManager {
     };
     jobData.applicationDeadline = convertToDate(applicationDeadline);
 
-    `jodata looks like`, jobData;
-
     // Validate the data
     const { errors } = validate(zodBodySchema, jobData);
 
     errors?.forEach((error) => {
-      `error from zod`, error;
       const errorElement = document.querySelector(
         `#${error.error}-error`,
       ) as HTMLElement;
@@ -90,9 +87,7 @@ class JobManager {
           "Content-Type": "application/json",
         },
       });
-      `gotten response is`, response;
     } catch (err) {
-      "error is", err;
       throw new Error(`Error posting job`);
     }
   }
@@ -383,9 +378,7 @@ class JobPostManager {
           Authorization: accessToken ? `Bearer ${accessToken}` : "",
         },
       });
-      `gotten response is`, response.data;
       this.jobLists = response.data;
-      `local job list`, this.jobLists;
     } catch (error) {
       throw Error("failed to fetch error");
     }
@@ -395,11 +388,8 @@ class JobPostManager {
 
   private createJobList() {
     this.jobSectionJobList.innerHTML = "";
-    `job is`, this.jobLists;
 
     this.jobLists.forEach((job, index) => {
-      `each individual job is`, job;
-
       const jobPost = document.createElement("div");
       jobPost.innerHTML = this.createJobPost(job, index);
       jobPost.classList.add("w-4/5");

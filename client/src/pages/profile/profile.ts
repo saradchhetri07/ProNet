@@ -123,8 +123,6 @@ class ProfileManager {
         );
       }
 
-      `gotten response form server is`, response;
-
       if (!response) {
         throw new Error("Failed to upload photo");
       }
@@ -289,8 +287,6 @@ class ProfileManager {
 
   private showJobModal() {
     `inside show job modal`;
-    `profile modal container is`, this.profileEditModalContainer;
-
     this.profileEditModalContainer.classList.remove("hidden");
   }
 
@@ -312,8 +308,6 @@ class ProfileManager {
       if (!response) {
         throw new Error("Network response was not ok");
       }
-      `profile fetch posts`, response.data;
-
       this.posts = response.data;
       this.getMyPosts("5");
     } catch (error) {
@@ -393,7 +387,6 @@ class ProfileManager {
       // currentCompany,
       // currentPosition,
     };
-    `retrieved profile data is`, profileData;
   }
 
   private handleDocumentClick(event: MouseEvent): void {
@@ -427,7 +420,6 @@ class ProfileManager {
 
   private getMyPosts(userId: string) {
     this.posts = this.posts.filter((post) => post.userId === userId);
-    `posts are`, this.posts;
   }
 
   toggleComments(postId: string) {
