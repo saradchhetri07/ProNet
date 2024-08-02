@@ -67,8 +67,6 @@ export const signUp = async (
 
   const hashedPassword = await bcrypt.hash(body.password, 10);
 
-  `user is`, body;
-
   const users = await AuthServices.signUp({
     ...body,
     profile_photo_url:

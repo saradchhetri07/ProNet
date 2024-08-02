@@ -21,8 +21,6 @@ export const createUsersProfile = async (
 ) => {
   const { body } = req;
 
-  `gotten profile body is`, body.headline;
-
   await UserServices.createUserProfile(body, req.user!.id);
   return res
     .status(HTTPStatusCodes.CREATED)

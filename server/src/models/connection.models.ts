@@ -11,7 +11,6 @@ export class ConnectionModel extends BaseModel {
       connectionUserId: connectUserId,
       status: "pending",
     };
-    `obtained connection request`, connectionRequest;
 
     try {
       const [isConnected] = await this.queryBuilder()
@@ -59,8 +58,6 @@ export class ConnectionModel extends BaseModel {
 
   static async acceptConnections(userId: string, status: string) {
     try {
-      `status from frontend: `, status;
-
       const connections = await this.queryBuilder()
         .table("connections")
         .where({ user_id: userId, status: "pending" })
@@ -85,13 +82,9 @@ export class ConnectionModel extends BaseModel {
       .table("connections as c")
       .where({ connectionUserId: userId, status: "pending" });
 
-    `requestedUserIds are`, requestUserId;
-
     const requestUserIdsArray = requestUserId.map((user) =>
       parseInt(user.userId, 10)
     );
-
-    `requestUserIdsArray`, requestUserIdsArray;
 
     //get information about the request user
     try {
@@ -142,22 +135,16 @@ export class ConnectionModel extends BaseModel {
         .table("connections as c")
         .where({ status: "confirmed" });
 
-      `mutualConnections`, mutualConnections;
-
       const connections: number[][] = mutualConnections.map((item) => [
         parseInt(item.userId),
         parseInt(item.connectionUserId),
       ]);
-
-      `connections are transformation is`, connections;
 
       const graphRecommendation = new GraphRecommendation(connections);
       graphRecommendation.setupAndUseRecommendationSystem();
       const recommendedUserIds = graphRecommendation.getRecommendationBFS(
         parseInt(userId)
       );
-
-      `recommended users ids are`, recommendedUserIds;
 
       const recommendedUserInfo = await this.queryBuilder()
         .select(

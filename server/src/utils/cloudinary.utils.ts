@@ -20,7 +20,7 @@ export const cloudinaryUpload = async (
         resource_type: "auto",
       }
     );
-    "File has been uploaded to Cloudinary:", response.url;
+
     fs.unlinkSync(localFilePath);
     return response;
   } catch (error) {

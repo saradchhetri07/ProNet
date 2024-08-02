@@ -64,7 +64,7 @@ export const getPosts = async (
   next: NextFunction
 ) => {
   const { sortPref } = req.query;
-  `came to fetch the posts`, sortPref;
+
   let posts;
   const userId = req.user?.id;
   if (sortPref === "date") {
@@ -92,9 +92,6 @@ export const insertComment = async (
 
   const { content } = req.body;
 
-  `post id is`, postId;
-  `content is`, content;
-
   await PostServices.insertComments(req.user!.id, postId, content);
 
   return res
@@ -109,10 +106,7 @@ export const getComments = async (
 ) => {
   const postIdsParams = req.query.postIds as string;
 
-  `gotten postIdsparams is`, typeof postIdsParams;
-
   const postIds: string[] = postIdsParams.split(",").map((item) => item.trim());
-  `postIds now is`, postIds;
 
   const comments = await PostServices.getComments(postIds);
   return res.status(HTTPStatusCodes.OK).send({ comments });

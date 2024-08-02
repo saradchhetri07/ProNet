@@ -14,10 +14,9 @@ export class JobModel extends BaseModel {
       const jobCreated = await this.queryBuilder()
         .table("jobs_table")
         .insert(jobToInsert);
-      `job created`, jobCreated;
+
       return jobCreated;
     } catch (error) {
-      `error inside catch`, error;
       throw new ServerError("Internal Server Error");
     }
   }

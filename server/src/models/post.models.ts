@@ -25,8 +25,6 @@ export class PostModel extends BaseModel {
 
   static async getPostByDate(userIds: string[]) {
     try {
-      `userIds `, userIds;
-
       const likesCountSubquery = this.queryBuilder()
         .table("likes as l")
         .select("l.post_id")
@@ -120,8 +118,6 @@ export class PostModel extends BaseModel {
         content: content,
       };
 
-      `commentToPost`, commentToPost;
-
       const isCreated = await this.queryBuilder()
         .table("comments")
         .insert(commentToPost);
@@ -149,7 +145,6 @@ export class PostModel extends BaseModel {
       return comments;
     } catch (error) {
       if (error instanceof Error) {
-        `inside get comments error handler`, error.message;
         throw new ServerError(error.message);
       }
     }

@@ -15,12 +15,10 @@ export class UserModel extends BaseModel {
         name: body.name,
         profile_photo_url: body.profile_photo_url,
       };
-      `user to create is`, userToCreate;
 
       const user = await this.queryBuilder()
         .insert(userToCreate)
         .table("users");
-      `created user is`, user;
 
       return user;
     } catch (error) {
@@ -144,7 +142,7 @@ export class UserModel extends BaseModel {
         .update({ coverPhotoUrl: imageUrl })
         .where({ id: userId })
         .returning("coverPhotoUrl");
-      `inside models to update user cover Image`, coverPhotoUrl;
+
       return coverPhotoUrl;
     } catch (error: any) {
       // if (error instanceof Error) {

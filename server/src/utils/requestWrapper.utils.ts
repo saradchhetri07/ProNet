@@ -14,8 +14,6 @@ export function requestWrapper(callback: Function) {
       return await callback(req, res, next);
     } catch (e) {
       `never came here`;
-      `error is`, e;
-
       next(e);
     }
   };
