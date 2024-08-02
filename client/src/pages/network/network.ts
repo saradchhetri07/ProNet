@@ -39,7 +39,7 @@ class NetworkManager {
     const requestId = button.getAttribute("data-request-id");
 
     try {
-      // console.log(`type is`, typeof parseInt(requestId));
+      // (`type is`, typeof parseInt(requestId));
 
       const response = await axios.post(
         `${serverUrl}/connect/accept/${parseInt(requestId!)}`,
@@ -55,7 +55,7 @@ class NetworkManager {
 
       if (response.status == 202) {
         //create toast
-        console.log(`response is`, response);
+        `response is`, response;
 
         customToast(response.data.message);
         this.updatePost(requestId!);
@@ -153,7 +153,7 @@ class NetworkManager {
     const requestId = button.getAttribute("data-request-id");
 
     try {
-      // console.log(`type is`, typeof parseInt(requestId));
+      // (`type is`, typeof parseInt(requestId));
 
       const response = await axios.post(
         `${serverUrl}/connect/${parseInt(requestId!)}`,
@@ -164,7 +164,7 @@ class NetworkManager {
           },
         },
       );
-      console.log(`response is`, response);
+      `response is`, response;
       if (response.status == 202) {
         //create toast
 
@@ -241,7 +241,7 @@ class NetworkManager {
 
       this.requestConnect = response.data;
 
-      console.log(`gotten response of connect user is`, this.requestConnect);
+      `gotten response of connect user is`, this.requestConnect;
     } catch (err: any) {
       throw new Error(err);
     }
@@ -260,7 +260,7 @@ class NetworkManager {
 
       if (response.status === 200) {
         this.recommendations = response.data;
-        console.log(`recommendations is`, this.recommendations);
+        `recommendations is`, this.recommendations;
       }
     } catch (error) {
       throw new Error("failed to fetch recommendation");

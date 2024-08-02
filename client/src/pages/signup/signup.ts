@@ -49,8 +49,8 @@ function handleFormSubmit(event: Event): void {
 }
 
 async function submitSignUpForm(data: ISignUpForm, file: File | null) {
-  console.log(`Submitting form data...`);
-  console.log(`File value is`, file);
+  `Submitting form data...`;
+  `File value is`, file;
 
   // Create a new FormData instance
   const formData = new FormData();
@@ -60,26 +60,26 @@ async function submitSignUpForm(data: ISignUpForm, file: File | null) {
   formData.append("name", data.name);
   formData.append("password", data.password);
 
-  console.log(`new appeded data is`, formData);
-  console.log(`received  data is`, data);
+  `new appeded data is`, formData;
+  `received  data is`, data;
 
   // Append the file to FormData if it exists
   if (file) {
     formData.append("profilePhoto", file);
   } else {
-    console.log("No profile photo selected.");
+    ("No profile photo selected.");
   }
 
   try {
     // Send the POST request with axios
-    console.log(`form data is`, formData);
+    `form data is`, formData;
 
     const response = await axios.post(
       "http://localhost:3000/auth/signUp",
       file !== undefined ? formData : data,
     );
 
-    console.log(`Response:`, response);
+    `Response:`, response;
 
     Toastify({
       text: `Signed up successfully`,

@@ -16,7 +16,7 @@ export const createConnection = async (
 };
 
 export const acceptConnections = (userId: string, status: string) => {
-  console.log(`status from frontend: seveices `, status);
+  `status from frontend: seveices `, status;
   const connections = ConnectionModel.acceptConnections(userId, status);
 
   if (!connections) {

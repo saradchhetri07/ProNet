@@ -32,5 +32,5 @@ app.use(limiter);
 app.use(genericErrorHandler);
 
 app.listen(config.PORT, () => {
-  console.log(`listening on port ${config.PORT}`);
+  `listening on port ${config.PORT}`;
 });

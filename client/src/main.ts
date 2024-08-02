@@ -10,15 +10,9 @@ class App {
   }
 
   private async init() {
-    console.log(`trying to init app`);
-
     if (this.isTokenValid()) {
-      console.log(`token is valid`);
-
       await this.verifyToken();
     } else {
-      console.log(`invalid token`);
-
       this.redirectToHome();
     }
   }
@@ -34,8 +28,6 @@ class App {
           Authorization: `Bearer ${accessToken}`,
         },
       });
-
-      console.log(`response is`, response);
 
       if (response.data.valid) {
         localStorage.setItem("me", JSON.stringify(response.data));

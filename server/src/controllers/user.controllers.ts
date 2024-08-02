@@ -21,7 +21,7 @@ export const createUsersProfile = async (
 ) => {
   const { body } = req;
 
-  console.log(`gotten profile body is`, body.headline);
+  `gotten profile body is`, body.headline;
 
   await UserServices.createUserProfile(body, req.user!.id);
   return res
@@ -61,7 +61,7 @@ export const updateProfileImage = async (req: Request, res: Response) => {
 
 export const updateCoverImage = async (req: Request, res: Response) => {
   const files: any = req.files;
-  console.log(`inside update cover Image`);
+  `inside update cover Image`;
   let coverPhotoLocalPath: string = "";
   let uploadedCoverPhotoUrl: any;
   if (files !== undefined) {

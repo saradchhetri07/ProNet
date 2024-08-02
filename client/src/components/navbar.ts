@@ -59,9 +59,7 @@ export class Navbar {
     const navLinks = document.querySelectorAll(".nav-link");
 
     navLinks.forEach((link) => {
-
       const page = link.getAttribute("data-page");
-      console.log(`page: ${page}`);
 
       if (page && currentPath.includes(page)) {
         link.classList.add("active");

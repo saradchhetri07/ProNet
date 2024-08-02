@@ -5,14 +5,14 @@ import axios from "axios";
 import Toastify from "toastify-js";
 
 const submitErrorContainer = document.getElementById(
-  "submit_error_container"
+  "submit_error_container",
 ) as HTMLDivElement;
 
 function handleFormSubmit(event: Event): void {
   event.preventDefault();
 
   const target = event.target as HTMLFormElement;
-  console.log(`came inside login handle button`);
+  `came inside login handle button`;
 
   const data = {
     email: target.email.value,
@@ -24,7 +24,7 @@ function handleFormSubmit(event: Event): void {
   if (error) {
     displayErrors(error.message, submitErrorContainer);
   } else {
-    console.log(`inside handle submit form`, data);
+    `inside handle submit form`, data;
     submitLogInForm(data);
   }
 }
@@ -56,11 +56,11 @@ async function submitLogInForm(data: ILogInForm) {
   } catch (error: any) {
     console.error(
       "Error:",
-      error.response ? error.response.data : error.message
+      error.response ? error.response.data : error.message,
     );
     displayErrors(
       error.response ? error.response.data.message : error.message,
-      submitErrorContainer
+      submitErrorContainer,
     );
   }
 }

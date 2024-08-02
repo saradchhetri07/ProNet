@@ -5,7 +5,7 @@ import { BaseModel } from "./base.models";
 export class JobModel extends BaseModel {
   static async postsJobs(JobBody: Job, userId: string) {
     try {
-      console.log(`form the frontend`);
+      `form the frontend`;
 
       const jobToInsert = {
         ...JobBody,
@@ -14,10 +14,10 @@ export class JobModel extends BaseModel {
       const jobCreated = await this.queryBuilder()
         .table("jobs_table")
         .insert(jobToInsert);
-      console.log(`job created`, jobCreated);
+      `job created`, jobCreated;
       return jobCreated;
     } catch (error) {
-      console.log(`error inside catch`, error);
+      `error inside catch`, error;
       throw new ServerError("Internal Server Error");
     }
   }

@@ -50,7 +50,6 @@ class JobManager {
     const descriptions = (
       document.getElementById("descriptions") as HTMLTextAreaElement
     ).value;
-    // console.log(`title is`, title);
 
     // Create the data object
     const jobData = {
@@ -66,13 +65,13 @@ class JobManager {
     };
     jobData.applicationDeadline = convertToDate(applicationDeadline);
 
-    console.log(`jodata looks like`, jobData);
+    `jodata looks like`, jobData;
 
     // Validate the data
     const { errors } = validate(zodBodySchema, jobData);
 
     errors?.forEach((error) => {
-      console.log(`error from zod`, error);
+      `error from zod`, error;
       const errorElement = document.querySelector(
         `#${error.error}-error`,
       ) as HTMLElement;
@@ -91,9 +90,9 @@ class JobManager {
           "Content-Type": "application/json",
         },
       });
-      console.log(`gotten response is`, response);
+      `gotten response is`, response;
     } catch (err) {
-      console.log("error is", err);
+      "error is", err;
       throw new Error(`Error posting job`);
     }
   }
@@ -376,7 +375,7 @@ class JobPostManager {
   }
 
   private async fetchJobList() {
-    console.log(`came to fetch the list`);
+    `came to fetch the list`;
 
     try {
       const response = await axios.get(`${serverUrl}/jobs`, {
@@ -384,9 +383,9 @@ class JobPostManager {
           Authorization: accessToken ? `Bearer ${accessToken}` : "",
         },
       });
-      console.log(`gotten response is`, response.data);
+      `gotten response is`, response.data;
       this.jobLists = response.data;
-      console.log(`local job list`, this.jobLists);
+      `local job list`, this.jobLists;
     } catch (error) {
       throw Error("failed to fetch error");
     }
@@ -396,10 +395,10 @@ class JobPostManager {
 
   private createJobList() {
     this.jobSectionJobList.innerHTML = "";
-    console.log(`job is`, this.jobLists);
+    `job is`, this.jobLists;
 
     this.jobLists.forEach((job, index) => {
-      console.log(`each individual job is`, job);
+      `each individual job is`, job;
 
       const jobPost = document.createElement("div");
       jobPost.innerHTML = this.createJobPost(job, index);

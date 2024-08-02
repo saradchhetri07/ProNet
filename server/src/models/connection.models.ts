@@ -11,7 +11,7 @@ export class ConnectionModel extends BaseModel {
       connectionUserId: connectUserId,
       status: "pending",
     };
-    console.log(`obtained connection request`, connectionRequest);
+    `obtained connection request`, connectionRequest;
 
     try {
       const [isConnected] = await this.queryBuilder()
@@ -59,7 +59,7 @@ export class ConnectionModel extends BaseModel {
 
   static async acceptConnections(userId: string, status: string) {
     try {
-      console.log(`status from frontend: `, status);
+      `status from frontend: `, status;
 
       const connections = await this.queryBuilder()
         .table("connections")
@@ -85,13 +85,13 @@ export class ConnectionModel extends BaseModel {
       .table("connections as c")
       .where({ connectionUserId: userId, status: "pending" });
 
-    console.log(`requestedUserIds are`, requestUserId);
+    `requestedUserIds are`, requestUserId;
 
     const requestUserIdsArray = requestUserId.map((user) =>
       parseInt(user.userId, 10)
     );
 
-    console.log(`requestUserIdsArray`, requestUserIdsArray);
+    `requestUserIdsArray`, requestUserIdsArray;
 
     //get information about the request user
     try {
@@ -142,14 +142,14 @@ export class ConnectionModel extends BaseModel {
         .table("connections as c")
         .where({ status: "confirmed" });
 
-      console.log(`mutualConnections`, mutualConnections);
+      `mutualConnections`, mutualConnections;
 
       const connections: number[][] = mutualConnections.map((item) => [
         parseInt(item.userId),
         parseInt(item.connectionUserId),
       ]);
 
-      console.log(`connections are transformation is`, connections);
+      `connections are transformation is`, connections;
 
       const graphRecommendation = new GraphRecommendation(connections);
       graphRecommendation.setupAndUseRecommendationSystem();
@@ -157,7 +157,7 @@ export class ConnectionModel extends BaseModel {
         parseInt(userId)
       );
 
-      console.log(`recommended users ids are`, recommendedUserIds);
+      `recommended users ids are`, recommendedUserIds;
 
       const recommendedUserInfo = await this.queryBuilder()
         .select(

@@ -8,7 +8,7 @@ export const postJobs = async (
   res: Response,
   next: NextFunction
 ) => {
-  console.log(`came to post jobs`);
+  `came to post jobs`;
   const userId = req.user!.id;
   await JobServices.postsJobs(req.body, userId);
 

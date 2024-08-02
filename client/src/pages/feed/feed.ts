@@ -286,8 +286,6 @@ class FeedForm {
         },
       });
 
-      console.log(`response from data is`, response.data);
-
       if (response.data) {
         localStorage.setItem("myId", JSON.stringify(response.data[0].id));
         localStorage.setItem("myName", JSON.stringify(response.data[0].name));
@@ -353,10 +351,6 @@ class FeedForm {
         formData.append("postMedia", this.imageFile);
       }
 
-      console.log(`image file`, this.imageFile);
-
-      console.log(`form data is`, formData);
-
       // Post the data to your API endpoint
       const response = await axios.post(`${serverUrl}/posts`, formData, {
         headers: {
@@ -364,19 +358,6 @@ class FeedForm {
           "Content-Type": "multipart/form-data",
         },
       });
-
-      console.log(`response`, response.data.message);
-
-      Toastify({
-        text: `${response.data.message}`,
-        duration: 3000,
-        destination: "https://github.com/apvarun/toastify-js",
-        newWindow: true,
-        gravity: "top", // `top` or `bottom`
-        position: "right", // `left`, `center` or `right`
-        stopOnFocus: true, // Prevents dismissing of toast
-        className: "toast-custom",
-      }).showToast();
     } catch (error) {
       console.error("Error posting data:", error);
     }

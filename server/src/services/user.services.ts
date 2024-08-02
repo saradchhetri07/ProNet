@@ -5,12 +5,12 @@ import { ServerError } from "../errors/ServerError.errors";
 import { NotFoundError } from "../errors/NotFound.errors";
 
 export const signUp = (body: Omit<User, "id">) => {
-  console.log(`inside user services sign up`);
+  `inside user services sign up`;
   return UserModel.UserModel.signUp(body);
 };
 
 export const getUserByEmail = (email: string) => {
-  console.log(`inside user services`);
+  `inside user services`;
 
   return UserModel.UserModel.getUserByEmail(email);
 };
@@ -54,7 +54,7 @@ export const updateUserCoverImage = async (
   userId: string,
   imageUrl: string
 ) => {
-  console.log(`inside update cover Image services`);
+  `inside update cover Image services`;
 
   const updatedCoverImage = await UserModel.UserModel.updateUserCoverImage(
     userId,

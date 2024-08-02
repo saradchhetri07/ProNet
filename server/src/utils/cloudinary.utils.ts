@@ -20,7 +20,7 @@ export const cloudinaryUpload = async (
         resource_type: "auto",
       }
     );
-    console.log("File has been uploaded to Cloudinary:", response.url);
+    "File has been uploaded to Cloudinary:", response.url;
     fs.unlinkSync(localFilePath);
     return response;
   } catch (error) {
@@ -36,7 +36,7 @@ export const cloudinaryUpload = async (
 //     const response: UploadApiResponse = await cloudinary.uploader.upload_large(localFilePath, {
 //       resource_type: "video",
 //     });
-//     console.log("File has been uploaded to Cloudinary:", response.url);
+//     ("File has been uploaded to Cloudinary:", response.url);
 //     fs.unlinkSync(localFilePath);
 //     return response;
 //   } catch (error) {
@@ -66,7 +66,7 @@ export const cloudinaryDelete = async (
 ): Promise<UploadApiResponse> => {
   try {
     const publicId = getPublicId(publicUrl);
-    console.log(publicId);
+    publicId;
     // Delete from Cloudinary
     const response: UploadApiResponse = await cloudinary.uploader.destroy(
       publicId,

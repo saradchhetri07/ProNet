@@ -81,7 +81,7 @@ class ProfileManager {
 
       this.uploadPhoto(file, type)
         .then((newPhotoUrl) => {
-          console.log(`entered into the upload photo section`);
+          `entered into the upload photo section`;
 
           // Update the image in the DOM
           const imgElement =
@@ -123,7 +123,7 @@ class ProfileManager {
         );
       }
 
-      console.log(`gotten response form server is`, response);
+      `gotten response form server is`, response;
 
       if (!response) {
         throw new Error("Failed to upload photo");
@@ -196,7 +196,7 @@ class ProfileManager {
               <label class="block text-gray-700 text-sm font-bold mb-2 font-primary" for="headline">
                 headline
               </label>
-              <textarea class="input-field shadow appearance-none border-2 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline font-primary" id="headline" type="text" placeholder="headline" rows="2" >
+              <textarea class="input-field shadow appearance-none border-2 rounded w-full py-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline font-primary" id="headline" type="text" placeholder="headline" rows="2" >
               </textarea>
                 <span id="headline-error" class="post-error text-red-500 text-xs italic font-primary"></span>
             </div>
@@ -262,7 +262,7 @@ class ProfileManager {
         current position
       </label>
 
-      <input class="input-field shadow appearance-none border-2 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline font-primary" id="CurrentCompany" type="text" placeholder="current position">
+      <input class="input-field shadow appearance-none border-2 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline font-primary" id="CurrentPosition" type="text" placeholder="current position">
 
       <span id="CurrentPosition-error" class="error text-red-500 text-xs italic font-primary"></span>
 
@@ -288,8 +288,8 @@ class ProfileManager {
   }
 
   private showJobModal() {
-    console.log(`inside show job modal`);
-    console.log(`profile modal container is`, this.profileEditModalContainer);
+    `inside show job modal`;
+    `profile modal container is`, this.profileEditModalContainer;
 
     this.profileEditModalContainer.classList.remove("hidden");
   }
@@ -312,7 +312,7 @@ class ProfileManager {
       if (!response) {
         throw new Error("Network response was not ok");
       }
-      console.log(`profile fetch posts`, response.data);
+      `profile fetch posts`, response.data;
 
       this.posts = response.data;
       this.getMyPosts("5");
@@ -369,19 +369,31 @@ class ProfileManager {
     submitButton?.addEventListener("click", () => this.editProfile());
   }
   private async editProfile(): Promise<void> {
-    const headline = document.getElementById("headline");
-    const summary = document.getElementById("summary");
-    const industry = document.getElementById("Industry");
-    const experience = document.getElementById("Experience");
-    const currentCompany = document.getElementById("CurrentCompany");
-    const currentPosition = document.getElementById("CurrentPosition");
+    const headline = (
+      document.getElementById("headline") as HTMLTextAreaElement
+    ).value;
+    const summary = (document.getElementById("summary") as HTMLInputElement)
+      .value;
+    const industry = (document.getElementById("Industry") as HTMLInputElement)
+      .value;
+    const experience = (
+      document.getElementById("Experience") as HTMLInputElement
+    ).value;
+    const currentCompany = (
+      document.getElementById("CurrentCompany") as HTMLInputElement
+    ).value;
+    const currentPosition = (
+      document.getElementById("CurrentPosition") as HTMLInputElement
+    ).value;
     const profileData = {
       headline,
-      summary,
-      industry,
-      experience,
-      currentPosition,
+      // summary,
+      // industry,
+      // experience,
+      // currentCompany,
+      // currentPosition,
     };
+    `retrieved profile data is`, profileData;
   }
 
   private handleDocumentClick(event: MouseEvent): void {
@@ -415,7 +427,7 @@ class ProfileManager {
 
   private getMyPosts(userId: string) {
     this.posts = this.posts.filter((post) => post.userId === userId);
-    console.log(`posts are`, this.posts);
+    `posts are`, this.posts;
   }
 
   toggleComments(postId: string) {

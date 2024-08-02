@@ -15,12 +15,12 @@ export class UserModel extends BaseModel {
         name: body.name,
         profile_photo_url: body.profile_photo_url,
       };
-      console.log(`user to create is`, userToCreate);
+      `user to create is`, userToCreate;
 
       const user = await this.queryBuilder()
         .insert(userToCreate)
         .table("users");
-      console.log(`created user is`, user);
+      `created user is`, user;
 
       return user;
     } catch (error) {
@@ -137,14 +137,14 @@ export class UserModel extends BaseModel {
       if (typeof imageUrl !== "string") {
         throw new BadRequestError("Invalid image url");
       }
-      console.log(`inside models to update user cover Image`);
+      `inside models to update user cover Image`;
 
       const coverPhotoUrl = await this.queryBuilder()
         .table("users")
         .update({ coverPhotoUrl: imageUrl })
         .where({ id: userId })
         .returning("coverPhotoUrl");
-      console.log(`inside models to update user cover Image`, coverPhotoUrl);
+      `inside models to update user cover Image`, coverPhotoUrl;
       return coverPhotoUrl;
     } catch (error: any) {
       // if (error instanceof Error) {

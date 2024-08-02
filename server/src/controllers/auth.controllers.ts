@@ -49,7 +49,7 @@ export const signUp = async (
   next: NextFunction
 ) => {
   const { body } = req;
-  console.log(`inside controlller`);
+  `inside controlller`;
 
   //check if the user exist
   await AuthServices.getUserByEmail(body.email, "signUp");
@@ -67,7 +67,7 @@ export const signUp = async (
 
   const hashedPassword = await bcrypt.hash(body.password, 10);
 
-  console.log(`user is`, body);
+  `user is`, body;
 
   const users = await AuthServices.signUp({
     ...body,

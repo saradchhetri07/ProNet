@@ -30,7 +30,7 @@ export const genericErrorHandler = (
   }
 
   if (error instanceof BadRequestError) {
-    console.log(`came to throw bad request error`);
+    `came to throw bad request error`;
 
     return res.status(HTTPStatusCodes.BAD_REQUEST).json({
       message: error.message,
