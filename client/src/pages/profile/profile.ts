@@ -21,15 +21,16 @@ class ProfileManager {
   profileDetails!: ProfileDetailsInterface;
 
   constructor() {
+    this.init();
     this.profileFeedSection = document.querySelector(
       "#profile-feed-container",
     )!;
     this.profileHeadSection = document.querySelector("#profile-head")!;
 
-    this.init();
     this.addPhotoChangeListeners(this.profileHeadSection, myDetails.myId!);
     // this.fetchUserDetails();
   }
+
   private async init() {
     await this.fetchUserDetails();
     this.createProfileHead();
@@ -57,6 +58,8 @@ class ProfileManager {
     profileSection: HTMLElement,
     userId: string,
   ): void {
+    console.log(`came to add photo change`);
+
     const coverPhotoArea = profileSection.querySelector(
       ".cover-photo",
     ) as HTMLElement;
@@ -200,6 +203,7 @@ class ProfileManager {
       (errorMessage as HTMLElement).style.display = "none";
     });
   }
+
   private hideJobModal(tag: string) {
     if (tag === "close") {
       this.resetInitialField();
@@ -257,6 +261,9 @@ class ProfileManager {
 
     editProfileButton?.addEventListener("click", () => this.showJobModal());
 
+    if (!this.profileEditModalContainer) {
+      return;
+    }
     this.profileEditModalContainer.addEventListener("click", (e) => {
       if (e.target === this.profileEditModalContainer) {
         this.hideJobModal("close");

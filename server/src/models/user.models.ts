@@ -16,14 +16,19 @@ export class UserModel extends BaseModel {
         profile_photo_url: body.profile_photo_url,
       };
 
-      const user = await this.queryBuilder()
+      const userId = await this.queryBuilder()
         .insert(userToCreate)
         .table("users");
 
-      return user;
+      const profileToCreate = {
+        userId: userId,
+      };
+      await this.queryBuilder().table("profiles").insert(profileToCreate);
+
+      return userId;
     } catch (error) {
       if (error instanceof Error) {
-        throw new ServerError("Internal server error");
+        throw new ServerError(`${error}`);
       }
     }
   }

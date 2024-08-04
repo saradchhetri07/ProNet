@@ -1,7 +1,7 @@
 import { ISignUpForm } from "../../interface/signUpForm";
 import { loginUserBodySchema, signUpUserBodySchema } from "../../schema/user";
 import axios from "axios";
-import Toastify from "toastify-js";
+import { customToast } from "../../utils/toast";
 
 const submitErrorContainer = document.getElementById(
   "submit_error_container",
@@ -41,7 +41,6 @@ function handleFormSubmit(event: Event): void {
   // Validate the data
   const { error } = signUpUserBodySchema.validate(data);
   if (error) {
-    console.error(error);
     displayErrors(error.message, submitErrorContainer);
   } else {
     submitSignUpForm(data, file);
@@ -49,9 +48,6 @@ function handleFormSubmit(event: Event): void {
 }
 
 async function submitSignUpForm(data: ISignUpForm, file: File | null) {
-  `Submitting form data...`;
-  `File value is`, file;
-
   // Create a new FormData instance
   const formData = new FormData();
 
@@ -59,9 +55,6 @@ async function submitSignUpForm(data: ISignUpForm, file: File | null) {
   formData.append("email", data.email);
   formData.append("name", data.name);
   formData.append("password", data.password);
-
-  `new appeded data is`, formData;
-  `received  data is`, data;
 
   // Append the file to FormData if it exists
   if (file) {
@@ -72,26 +65,15 @@ async function submitSignUpForm(data: ISignUpForm, file: File | null) {
 
   try {
     // Send the POST request with axios
-    `form data is`, formData;
 
     const response = await axios.post(
       "http://localhost:3000/auth/signUp",
       file !== undefined ? formData : data,
     );
 
-    `Response:`, response;
-
-    Toastify({
-      text: `Signed up successfully`,
-      duration: 3000,
-      destination: "https://github.com/apvarun/toastify-js",
-      newWindow: true,
-      gravity: "top", // `top` or `bottom`
-      position: "right", // `left`, `center` or `right`
-      stopOnFocus: true, // Prevents dismissing of toast
-      className: "toast-custom",
-    }).showToast();
-
+    if (response.status === 200) {
+      customToast("Sign Up sucessfull");
+    }
     // Redirect to login page after 3 seconds
     setTimeout(() => {
       window.location.href = "http://localhost:5173/src/pages/login/login.html";

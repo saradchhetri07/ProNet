@@ -29,9 +29,6 @@ class JobManager {
   constructor(containerId: string) {
     const container = document.getElementById(containerId) as HTMLDivElement;
 
-    if (!container) {
-      customToast("Error loading");
-    }
     this.JobContainer = container;
     this.makeSideBar();
     this.createJobModal();
@@ -117,7 +114,7 @@ class JobManager {
     ) as HTMLButtonElement;
 
     if (!this.createJobButton) {
-      throw new Error(`Button with id create-jobs not found`);
+      return;
     }
 
     this.createJobButton.addEventListener("click", () => this.showJobModal());
@@ -194,7 +191,7 @@ class JobManager {
       this.JobPostManager.setJobByFilter(this.jobLists);
       this.JobPostManager.createJobList();
     } catch (error: any) {
-      customToast(error.message);
+      customToast("Loading");
     }
   }
 
@@ -263,17 +260,12 @@ export class JobPostManager {
       "#jobs-section__joblist",
     ) as HTMLDivElement;
     this.jobApplyModal = document.createElement("div");
-
     this.init();
   }
 
   private async init() {
-    try {
-      await this.fetchJobList();
-      this.createJobList();
-    } catch (error: any) {
-      customToast("Server Error");
-    }
+    await this.fetchJobList();
+    this.createJobList();
   }
 
   getSearchResult(title: string) {
@@ -419,6 +411,9 @@ export class JobPostManager {
   }
 
   createJobList() {
+    if (!this.jobSectionJobList) {
+      return;
+    }
     this.jobSectionJobList.innerHTML = "";
 
     this.jobLists.forEach((job, index) => {

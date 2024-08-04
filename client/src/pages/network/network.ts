@@ -98,7 +98,9 @@ export class NetworkManager {
 
   private createRequestContainer() {
     // creating card for each of the user
-    this.mainSectionRequestCard.innerHTML = "";
+    if (this.mainSectionRequestCard) {
+      this.mainSectionRequestCard.innerHTML = "";
+    }
     this.requestConnect.forEach((request, index) => {
       const requestCard = document.createElement("div");
       requestCard.innerHTML = this.makeCard(request, index, "request");
@@ -126,6 +128,9 @@ export class NetworkManager {
   private createRecommendationContainer() {
     console.log(`inside create recommendation container`);
 
+    if (!this.mainSectionRecommendationCard) {
+      return;
+    }
     this.mainSectionRecommendationCard.innerHTML = "";
     this.recommendations.forEach((recommendation, index) => {
       const recommendationCard = document.createElement("div");

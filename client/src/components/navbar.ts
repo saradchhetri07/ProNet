@@ -1,5 +1,6 @@
 import { JobPostManager } from "../pages/jobs/jobs";
 import { NetworkManager } from "../pages/network/network";
+import { customToast } from "../utils/toast";
 
 export class Navbar {
   private containerId: string;
@@ -49,6 +50,10 @@ export class Navbar {
             <a href="/src/pages/profile/profile.html" class="nav-link" data-page="profile">
                 <i class="fas fa-user-circle text-xl"></i>
                 <span class="hidden md:inline font-primary">profile</span>
+            </a>
+            <a href="/src/pages/home/home.html" class="nav-link" data-page="logout" id="logout-link">
+                <i class="fas fa-user-circle text-xl"></i>
+                <span class="hidden md:inline font-primary">Log Out</span>
             </a>
 
         </div>
@@ -148,6 +153,22 @@ export class Navbar {
       } else {
         link.classList.remove("active");
       }
+    });
+
+    const logoutLink = document.getElementById("logout-link");
+
+    logoutLink!.addEventListener("click", function (event) {
+      event.preventDefault();
+
+      document.cookie =
+        "accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
+      localStorage.removeItem("accessToken");
+
+      customToast("you have been logged out");
+      setTimeout(() => {
+        window.location.href = "/src/pages/home/home.html";
+      }, 2000);
     });
   }
 }

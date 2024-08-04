@@ -35,6 +35,7 @@ async function submitLogInForm(data: ILogInForm) {
   try {
     // Send the POST request with axios
     const response = await axios.post("http://localhost:3000/auth/login", data);
+    console.log(`sdfasdfa`, response);
 
     if (response.status === 200) {
       localStorage.setItem("accessToken", `${response.data.accessToken}`);
@@ -42,11 +43,13 @@ async function submitLogInForm(data: ILogInForm) {
       setTimeout(() => {
         window.location.href = "http://localhost:5173/src/pages/feed/feed.html";
       }, 2000);
+    } else {
+      customToast(response.data.message);
     }
 
     // Redirect to login page after 3 seconds
   } catch (error: any) {
-    customToast(error.message);
+    customToast(error.response.data.message);
   }
 }
 

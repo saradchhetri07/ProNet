@@ -4,8 +4,6 @@ import { User } from "../interfaces/user.interfaces";
 import * as UserServices from "./user.services";
 
 export const signUp = (body: Omit<User, "id">) => {
-  `inside auth services sign up`;
-
   return UserServices.signUp(body);
 };
 
