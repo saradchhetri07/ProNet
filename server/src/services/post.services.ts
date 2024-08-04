@@ -19,7 +19,7 @@ export const getPostByDate = async (userId: string) => {
     return []; // No connections, returns an empty array
   }
 
-  const posts = await PostModel.getPostByDate(connectionsIds);
+  const posts = await PostModel.getPostByDate(connectionsIds, userId);
   if (!posts) {
     throw new NotFoundError("posts not found");
   }

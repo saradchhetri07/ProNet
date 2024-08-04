@@ -6,6 +6,7 @@ import { serverUrl } from "./constants/constant";
 
 class App {
   constructor() {
+    console.log("initialized app");
     this.init();
   }
 
@@ -23,13 +24,15 @@ class App {
 
   private async verifyToken() {
     try {
-      const response = await axios.get(`${serverUrl}/auth/me`, {
+      const response = await axios.get(`${serverUrl}/users/me`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
       });
 
-      if (response.data.valid) {
+      console.log(`gotten response is`, response.data);
+
+      if (response.status == 200) {
         localStorage.setItem("me", JSON.stringify(response.data));
         this.redirectToFeed();
       } else {
@@ -42,11 +45,11 @@ class App {
   }
 
   private redirectToFeed() {
-    window.location.href = "/feed.html";
+    window.location.href = "http://localhost:5173/src/pages/feed/feed.html";
   }
 
   private redirectToHome() {
-    window.location.href = "http://localhost:5173/src/pages/feed/feed.html";
+    window.location.href = "http://localhost:5173/src/pages/home/home.html";
   }
 }
 

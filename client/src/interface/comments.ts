@@ -1,7 +1,7 @@
 export interface CommentInterface {
-  profilePhotoUrl?: string;
+  profilePhotoUrl: string;
   name: string;
   content: string;
-  postId: string;
+  postId: string | null;
   commentDate: string;
 }

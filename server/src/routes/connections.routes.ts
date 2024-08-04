@@ -1,5 +1,9 @@
 import express from "express";
-import { connectRequest } from "../controllers/connection.controllers";
+import {
+  coldStartRecommendation,
+  connectRequest,
+  getConnectionsCount,
+} from "../controllers/connection.controllers";
 import { acceptRequest } from "../controllers/connection.controllers";
 import { authenticate } from "../middlewares/auth.middlewares";
 import { requestWrapper } from "../utils/requestWrapper.utils";
@@ -8,6 +12,7 @@ import {
   getRequestedUserInfo,
   deleteConnectionRequest,
   getUserRecommendation,
+  getUserInfoBySearch,
 } from "../controllers/connection.controllers";
 
 const router = express.Router();
@@ -22,4 +27,7 @@ router.delete(
   requestWrapper(deleteConnectionRequest)
 );
 router.get("/userRecommendation", requestWrapper(getUserRecommendation));
+router.get("/search", requestWrapper(getUserInfoBySearch));
+router.get("/count", requestWrapper(getConnectionsCount));
+router.get("/coldStart", requestWrapper(coldStartRecommendation));
 export default router;

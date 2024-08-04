@@ -13,7 +13,7 @@ export function requestWrapper(callback: Function) {
     try {
       return await callback(req, res, next);
     } catch (e) {
-      `never came here`;
+      console.error("Error caught in requestWrapper:", e);
       next(e);
     }
   };

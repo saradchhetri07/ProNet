@@ -23,14 +23,47 @@ export class PostModel extends BaseModel {
     return postId;
   }
 
-  static async getPostByDate(userIds: string[]) {
+  static async getPostByDate(userIds: string[], userId: string) {
     try {
+      // const likesCountSubquery = this.queryBuilder()
+      //   .table("likes as l")
+      //   .select("l.post_id")
+      //   .count("l.post_id as like_count")
+      //   .groupBy("l.post_id")
+      //   .as("likes_count"); // Alias for the subquery;
+
+      // const commentsSubQuery = this.queryBuilder()
+      //   .table("comments as c")
+      //   .select("c.post_id")
+      //   .count("c.post_id as comment_count")
+      //   .groupBy("c.post_id")
+      //   .as("comments_count");
+
+      // const posts = await this.queryBuilder()
+      //   .table("posts as p")
+      //   .innerJoin("users as u", "p.user_id", "u.id")
+      //   .innerJoin("posts_media as m", "p.post_id", "m.post_id")
+      //   .leftJoin(likesCountSubquery, "p.post_id", "likes_count.post_id")
+      //   .leftJoin(commentsSubQuery, "p.post_id", "comments_count.post_id")
+      //   .select(
+      //     "p.post_id",
+      //     "p.content",
+      //     "p.created_at",
+      //     "u.id as userId",
+      //     "u.name",
+      //     "u.profile_photo_url",
+      //     "m.media_url",
+      //     "likes_count.like_count",
+      //     "comments_count.comment_count"
+      //   )
+      //   .whereIn("p.user_id", userIds)
+      //   .orderBy("p.created_at", "asc");
       const likesCountSubquery = this.queryBuilder()
         .table("likes as l")
         .select("l.post_id")
         .count("l.post_id as like_count")
         .groupBy("l.post_id")
-        .as("likes_count"); // Alias for the subquery;
+        .as("likes_count");
 
       const commentsSubQuery = this.queryBuilder()
         .table("comments as c")
@@ -39,12 +72,24 @@ export class PostModel extends BaseModel {
         .groupBy("c.post_id")
         .as("comments_count");
 
+      const currentUserLikesSubquery = this.queryBuilder()
+        .table("likes as cl")
+        .select("cl.post_id")
+        .where("cl.user_id", userId)
+        .groupBy("cl.post_id")
+        .as("current_user_likes");
+
       const posts = await this.queryBuilder()
         .table("posts as p")
         .innerJoin("users as u", "p.user_id", "u.id")
         .innerJoin("posts_media as m", "p.post_id", "m.post_id")
         .leftJoin(likesCountSubquery, "p.post_id", "likes_count.post_id")
         .leftJoin(commentsSubQuery, "p.post_id", "comments_count.post_id")
+        .leftJoin(
+          currentUserLikesSubquery,
+          "p.post_id",
+          "current_user_likes.post_id"
+        )
         .select(
           "p.post_id",
           "p.content",
@@ -54,7 +99,10 @@ export class PostModel extends BaseModel {
           "u.profile_photo_url",
           "m.media_url",
           "likes_count.like_count",
-          "comments_count.comment_count"
+          "comments_count.comment_count",
+          this.queryBuilder().raw(
+            "CASE WHEN current_user_likes.post_id IS NULL THEN FALSE ELSE TRUE END AS liked_by_current_user"
+          )
         )
         .whereIn("p.user_id", userIds)
         .orderBy("p.created_at", "asc");
@@ -100,6 +148,27 @@ export class PostModel extends BaseModel {
         postId: postId,
         userId: userId,
       };
+      //check if the post is already liked
+      const isAlreadyLiked = await this.queryBuilder()
+        .table("likes")
+        .select("like_id")
+        .where({ postId: postId, userId: userId });
+
+      //delete if already liked
+      if (isAlreadyLiked.length != 0) {
+        try {
+          const deleteLikes = await this.queryBuilder()
+            .table("likes")
+            .where({ postId: postId, userId: userId })
+            .delete();
+        } catch (error) {
+          if (error instanceof Error) {
+            throw new ServerError("Internal Server Error");
+          }
+        }
+
+        return;
+      }
       const isLiked = await this.queryBuilder().table("likes").insert(likeData);
 
       return isLiked;

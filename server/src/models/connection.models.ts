@@ -12,18 +12,12 @@ export class ConnectionModel extends BaseModel {
       status: "pending",
     };
 
-    try {
-      const [isConnected] = await this.queryBuilder()
-        .insert(connectionRequest)
-        .table("connections")
-        .returning("status");
+    const [isConnected] = await this.queryBuilder()
+      .insert(connectionRequest)
+      .table("connections")
+      .returning("status");
 
-      return isConnected;
-    } catch (error) {
-      if (error instanceof Error) {
-        throw new ServerError(`${error}`);
-      }
-    }
+    return isConnected;
   }
 
   static async getConnections(userId: string) {
@@ -56,6 +50,36 @@ export class ConnectionModel extends BaseModel {
     }
   }
 
+  static async getConnectionsCount(userId: string) {
+    try {
+      // Step 1: Retrieve connections where the user is either the initiator or the recipient
+      const connectionInitiator = await this.queryBuilder()
+        .select("connection_user_id")
+        .from("connections")
+        .where({ user_id: userId, status: "confirmed" });
+
+      const connectionRecipient = await this.queryBuilder()
+        .select("user_id as connection_user_id")
+        .table("connections")
+        .where({ connection_user_id: userId, status: "confirmed" });
+
+      const connections = [...connectionInitiator, ...connectionRecipient];
+
+      const connectionsIds: string[] = connections.map(
+        (connection) => connection.connectionUserId
+      );
+
+      if (!connections) {
+        throw new NotFoundError("No connections were found");
+      }
+      return connectionsIds.length;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new ServerError(error.message);
+      }
+    }
+  }
+
   static async acceptConnections(userId: string, status: string) {
     try {
       const connections = await this.queryBuilder()
@@ -75,6 +99,7 @@ export class ConnectionModel extends BaseModel {
     try {
     } catch (error) {}
   }
+
   static async getRequestedUserInfo(userId: string) {
     // try {
     const requestUserId = await this.queryBuilder()
@@ -160,6 +185,87 @@ export class ConnectionModel extends BaseModel {
       return recommendedUserInfo;
     } catch (error: any) {
       throw new ServerError(`error is ${error}`);
+    }
+  }
+
+  static async getUserInfoBySearch(name: any, userId: string) {
+    try {
+      const userInfo = await this.queryBuilder()
+        .select(
+          "u.id as userId",
+          "u.name",
+          "u.profile_photo_url",
+          "p.current_position"
+        )
+        .table("users as u")
+        .join("profiles as p", "p.userId", "u.id")
+        .where((builder) => {
+          builder
+            .andWhere("u.name", "ILIKE", `%${name}%`)
+            .andWhere("u.id", "!=", userId);
+        });
+      return userInfo;
+    } catch (error: any) {
+      if (error instanceof error) {
+        throw new ServerError(`Internal Server Error`);
+      }
+    }
+  }
+  static async coldStartRecommendation(userId: string) {
+    try {
+      const connectionUserIds = await this.queryBuilder()
+        .table("connections as c")
+        .select("c.connection_user_id")
+        .distinct()
+        .where((builder) => {
+          builder
+            .andWhere("c.user_id", "!=", userId)
+            .orWhere("c.user_id", "=", userId)
+            .andWhere("c.status", "pending");
+        });
+
+      const connectionUserIdsArray = connectionUserIds.map(
+        (connectionUserId) => {
+          return connectionUserId.connectionUserId;
+        }
+      );
+      console.log(connectionUserIdsArray);
+
+      // const nonFriendConnectionsUser = await this.queryBuilder()
+      //   .table("users as u")
+      //   .select("u.id")
+      //   .where("u.");
+
+      console.log(connectionUserIds);
+
+      const UserIds = await this.queryBuilder()
+        .select("u.id as userId")
+        .table("users as u")
+        .join("profiles as p", "p.userId", "u.id")
+        .where((builder) => {
+          builder.andWhere("u.id", "!=", userId);
+        });
+
+      const recommendedUserIds = UserIds.map((user) => user.userId);
+
+      const recommendedUserInfo = await this.queryBuilder()
+        .select(
+          "u.id as userId",
+          "u.name",
+          "u.profile_photo_url",
+          "p.current_position",
+          "c.status"
+        )
+        .table("users as u")
+        .join("profiles as p", "p.userId", "u.id")
+        .join("connections as c", "u.id", "c.connection_user_id")
+        .whereIn("p.userId", recommendedUserIds);
+
+      return recommendedUserInfo;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new ServerError(error.message);
+      }
     }
   }
 }

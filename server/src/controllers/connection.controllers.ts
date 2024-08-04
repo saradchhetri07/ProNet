@@ -9,22 +9,41 @@ export const connectRequest = async (
   res: Response,
   next: NextFunction
 ) => {
-  const userId = req.user!.id;
-  const connectUserId = req.params;
+  try {
+    const userId = req.user!.id;
+    const connectUserId = req.params.userId;
 
-  if (userId === connectUserId.userId) {
-    throw new BadRequestError("you can't connect to yourself");
+    if (userId === connectUserId) {
+      throw new BadRequestError("You can't connect to yourself");
+    }
+
+    await ConnectServices.createConnection(userId, connectUserId);
+    return res
+      .status(HTTPStatusCodes.CREATED)
+      .send({ message: "Connect request sent" });
+  } catch (error) {
+    next(error);
   }
 
-  await ConnectServices.createConnection(
-    userId,
-    connectUserId.userId.toString()
-  );
-  return res
-    .status(HTTPStatusCodes.CREATED)
-    .send({ message: "Connect request sent" });
-};
+  // try {
+  //   const userId = req.user!.id;
+  //   const connectUserId = req.params;
 
+  //   if (userId === connectUserId.userId) {
+  //     throw new BadRequestError("you can't connect to yourself");
+  //   }
+
+  //   await ConnectServices.createConnection(
+  //     userId,
+  //     connectUserId.userId.toString()
+  //   );
+  //   return res
+  //     .status(HTTPStatusCodes.CREATED)
+  //     .send({ message: "Connect request sent" });
+  // } catch (error) {
+  //   next(error);
+  // }
+};
 export const acceptRequest = async (
   req: Request,
   res: Response,
@@ -81,4 +100,26 @@ export const getUserRecommendation = async (
   const userId = req.user!.id;
   const recommendedUsers = await ConnectServices.getUserRecommendation(userId);
   return res.status(HTTPStatusCodes.OK).send(recommendedUsers);
+};
+
+export const getUserInfoBySearch = async (req: Request, res: Response) => {
+  const userId = req.user!.id;
+  const { name } = req.query;
+  const userInfo = await ConnectServices.getUserInfoBySearch(name, userId);
+  return res.status(HTTPStatusCodes.OK).send(userInfo);
+};
+
+export const getConnectionsCount = async (req: Request, res: Response) => {
+  const userId = req.user!.id;
+  console.log(`came to `, userId);
+
+  const connectionCount = await ConnectServices.getConnectionsCount(userId);
+
+  return res.status(HTTPStatusCodes.OK).send(connectionCount.toString());
+};
+
+export const coldStartRecommendation = async (req: Request, res: Response) => {
+  const userId = req.user!.id;
+  const userInfo = await ConnectServices.coldStartRecommendation(userId);
+  return res.status(HTTPStatusCodes.OK).send(userInfo);
 };

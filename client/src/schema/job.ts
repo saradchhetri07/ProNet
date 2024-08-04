@@ -1,6 +1,45 @@
 import { z, ZodError, ZodSchema } from "zod";
 import { isAfterToday } from "../utils/validateDate";
 
+export const editProfileBodySchema = z.object({
+  headline: z
+    .string({
+      required_error: "headline cannot be empty",
+      invalid_type_error: "headline must be a string",
+    })
+    .min(10, "minimum 10 characters headline is required")
+    .max(50, "maximum 50 characters headline is allowed"),
+
+  summary: z
+    .string({
+      required_error: "summary cannot be empty",
+      invalid_type_error: "summary must be a string",
+    })
+    .min(5, "minimum 5 characters headline is required")
+    .max(50, "maximum 50 characters summary is allowed"),
+
+  experience: z
+    .string({
+      required_error: "experience cannot be empty",
+      invalid_type_error: "experience must be a string",
+    })
+    .min(1, "experience cannot be empty"),
+  currentCompany: z
+    .string({
+      required_error: "current company is required",
+      invalid_type_error: "current company must be a string",
+    })
+    .min(1, "current position cannot be empty")
+    .max(20, "maximum 20 characters is allowed"),
+  currentPosition: z
+    .string({
+      required_error: "current position is required",
+      invalid_type_error: "current position must be a string",
+    })
+    .min(1, "current position cannot be empty")
+    .max(20, "maximum 20 characters is allowed"),
+});
+
 export const zodBodySchema = z
   .object({
     title: z

@@ -1,9 +1,18 @@
+import { JobFilter } from "./../../../../server/src/interfaces/job.interfaces";
 import { Navbar } from "../../components/navbar";
 import axios from "axios";
 import { accessToken, serverUrl } from "../../constants/constant";
 import { validate, zodBodySchema } from "../../schema/job";
 import { convertToDate } from "../../utils/validateDate";
 import { Job } from "../../interface/job";
+import { customToast } from "../../utils/toast";
+import { jobSideBar } from "./jobSideBar";
+import { jobModal } from "./jobModal";
+import { jobApplication } from "./jobApplication";
+import { jobPost } from "./jobPost";
+import { jobApplyModal } from "./jobApply";
+import emailjs from "@emailjs/browser";
+import { config } from "../../utils/emailjs";
 
 class JobManager {
   private JobContainer!: HTMLDivElement;
@@ -12,12 +21,16 @@ class JobManager {
   private createJobButton!: HTMLButtonElement;
   private JobSectionModalContainer!: HTMLDivElement;
   private submitButton!: HTMLButtonElement;
+  private jobFilterSections!: HTMLFormElement;
+  private jobLists: Job[] = [];
+
+  private JobPostManager = new JobPostManager();
 
   constructor(containerId: string) {
     const container = document.getElementById(containerId) as HTMLDivElement;
 
     if (!container) {
-      throw new Error(`Container with id "${containerId}" not found`);
+      customToast("Error loading");
     }
     this.JobContainer = container;
     this.makeSideBar();
@@ -102,9 +115,11 @@ class JobManager {
     this.createJobButton = document.getElementById(
       "create-jobs",
     ) as HTMLButtonElement;
+
     if (!this.createJobButton) {
       throw new Error(`Button with id create-jobs not found`);
     }
+
     this.createJobButton.addEventListener("click", () => this.showJobModal());
 
     // Add event listener to close the modal when clicking outside
@@ -121,6 +136,66 @@ class JobManager {
     if (closeButton) {
       closeButton.addEventListener("click", () => this.hideJobModal());
     }
+
+    //filter job section
+    document
+      .getElementById("job-filters")!
+      .addEventListener("submit", () => this.handleJobFilterSection(event!));
+  }
+
+  private handleJobFilterSection(e: Event) {
+    e.preventDefault();
+
+    const form = e.target as HTMLFormElement;
+    const formData = new FormData(form);
+
+    // Convert employment_type checkboxes to array
+    const employmentType = formData.getAll("employment_type");
+    formData.delete("employmentType");
+    formData.append("employmentType", employmentType.join(","));
+
+    // Convert skills to array
+
+    const experienceLevel = formData.get("experienceLevel");
+    formData.delete("experienceLevel");
+    formData.append("experienceLevel", experienceLevel!);
+
+    const Salary = formData.get("salary");
+    formData.append("salary", Salary!);
+
+    const Location = formData.get("location");
+    formData.append("location", Location!);
+
+    const queryParams = new URLSearchParams({
+      categoryType: formData.get("categoryType") as string,
+      location: Location as string,
+      salary: formData.get("salary") as string,
+      employmentType: formData.get("employmentType") as string,
+      experienceLevel: formData.get("experienceLevel") as string,
+    });
+    this.postJobFilter(queryParams.toString());
+  }
+
+  private async postJobFilter(params: string) {
+    try {
+      console.log(
+        `form data at postjob filter`,
+        `${serverUrl}/jobs/filter?${params}`,
+      );
+
+      const response = await axios.get(`${serverUrl}/jobs/filter?${params}`, {
+        headers: {
+          Authorization: accessToken ? `Bearer ${accessToken}` : "",
+          "Content-Type": "application/json",
+        },
+      });
+
+      this.jobLists = response.data;
+      this.JobPostManager.setJobByFilter(this.jobLists);
+      this.JobPostManager.createJobList();
+    } catch (error: any) {
+      customToast(error.message);
+    }
   }
 
   private createJobModal() {
@@ -129,148 +204,14 @@ class JobManager {
       "fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center hidden";
     this.JobSectionModalContainer.id = "job-modal";
 
-    this.JobSectionModalContainer.innerHTML = /*html*/ `
-      <div class="bg-white p-6 rounded-lg w-full max-w-md">
-        <h2 class="text-2xl font-bold mb-4 font-primary">Create New Job</h2>
-        <form>
-          <!-- Add your form fields here -->
-          <div class = "flex gap-2">
-              <div class="mb-4">
-              <label class="block text-gray-700 text-sm font-bold mb-2 font-primary" for="title">
-                Title
-              </label>
-              <input class="input-field shadow appearance-none border-2 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline font-primary" id="title" type="text" placeholder="Job Title">
-              
-                <span id="title-error" class="post-error text-red-500 text-xs italic font-primary"></span>
-
-            </div>
-
-            <div class="mb-4">
-              <label class="block text-gray-700 text-sm font-bold mb-2 font-primary" for="location">
-                Location
-              </label>
-              <input class="input-field shadow appearance-none border-2 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline font-primary" id="location" type="text" placeholder="Location">
-
-              <span id="location-error" class="post-error text-red-500 text-xs italic font-primary"></span>
-            </div>
-          </div>
-         
-
-          <div class = "flex gap-2">
-              <div class="mb-4">
-              <label class="block text-gray-700 text-sm font-bold mb-2 font-primary" for="salary">
-                Salary
-              </label>
-              <input class="input-field shadow appearance-none border-2 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline font-primary" id="salary" type="text" placeholder="Salary">
-             
-            </div>
-
-            <div class="mb-4">
-                  <label class="block text-gray-700 text-sm font-bold mb-2 font-primary text-sm" for="employmentType">
-                    Employment Type
-                  </label>
-                  <select 
-                    class="shadow appearance-none border-2 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline font-primary" 
-                    id="employmentType"
-                  >
-                    <option value="Full-time">Full Time</option>
-                    <option value="Part-time">Part Time</option>
-
-                  </select>
-            </div>
-            
-          </div>
-          <span id="salary-error" class="post-error text-red-500 text-xs italic font-primary error"></span>
-
-          <div class="mb-4">
-          <label class="block text-gray-700 text-sm font-bold mb-2 font-primary text-sm" for="categoryType">
-            Job Category
-          </label>
-          <select 
-            class="shadow appearance-none border-2 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline font-primary" 
-            id="category"
-          >
-            <option value="Engineering and Technology">Engineering and Technology</option>
-            <option value="Administrative and Office Support">Administrative and Office Support</option>
-            <option value="Healthcare and Medical">Healthcare and Medical</option>
-            <option value="Education and Training">Education and Training</option>
-            <option value="Finance and Accounting">Finance and Accounting</option>
-            <option value="Sales and Marketing">Sales and Marketing</option>
-            <option value="Legal and Compliance">Legal and Compliance</option>
-            <option value="Science and Research">Science and Research</option>
-            
-          </select>
-    </div>
-
-          <div class="mb-4">
-  <label class="block text-gray-700 text-sm font-bold mb-2 font-primary" for="requiredSkills">
-    Required Skills
-  </label>
-  <textarea 
-    class="input-field shadow appearance-none border-2 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline font-primary"
-    id="requiredSkills"
-    placeholder="Required Skills"
-    rows="2" 
-  ></textarea>
-  <span id="requiredSkills-error" class="post-error error text-red-500 text-xs italic font-primary"></span>
-</div>
-
-          <div class="mb-4">
-
-          <label class="block text-gray-700 text-sm font-bold mb-2 font-primary" for="experienceLevel">
-            Experience Level
-          </label>
-
-          <input class="input-field shadow appearance-none border-2 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline font-primary" id="experienceLevel" type="text" placeholder="Experience Level">
-
-          <span id="experienceLevel-error" class="error text-red-500 text-xs italic font-primary"></span>
-
-        </div>
-
-        <div class="mb-4">
-        <label class="block text-gray-700 text-sm font-bold mb-2 font-primary" for="applicationDeadline">
-          Application Deadline
-        </label>
-        <input class="input-field shadow appearance-none border-2 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline font-primary" id="applicationDeadline" type="text" placeholder="Enter date in YYYY-MM-DD format">
-        <span id="applicationDeadline-error" class="post-error text-red-500 text-xs italic font-primary error"></span>
-      </div>
-
-
-      <div class="mb-4">
-      <label class="block text-gray-700 text-sm font-bold mb-2 font-primary" for="descriptions">
-        Descriptions
-      </label>
-      <textarea 
-        class="input-field shadow appearance-none border-2 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline font-primary"
-        id="descriptions"
-        placeholder="Descriptions"
-        name="descriptions"
-        rows="4" 
-      ></textarea>
-      <span id="descriptions-error" class="post-error text-red-500 text-xs italic font-primary error"></span>
-    </div>
-        
-          <!-- Add more form fields as needed -->
-          <div class="flex items-center justify-between">
-            <button class="bg-primary hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline
-            font-primary
-            " type="button"
-            id="submitButton"
-            >
-              Submit
-            </button>
-            <button class="bg-black hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline font-primary" type="button" data-close-button>
-              Close
-            </button>
-          </div>
-        </form>
-      </div>
-    `;
+    this.JobSectionModalContainer.innerHTML = jobModal();
 
     document.body.appendChild(this.JobSectionModalContainer);
   }
 
   private showJobModal() {
+    console.log(`came to show the job modal`);
+
     this.JobSectionModalContainer.classList.remove("hidden");
   }
 
@@ -291,58 +232,25 @@ class JobManager {
       "";
     (document.getElementById("descriptions") as HTMLTextAreaElement).value = "";
   }
+
   private makeSideBar() {
     this.JobSectionSidebar = document.getElementById(
       "jobs-section__sidebar",
     ) as HTMLDivElement;
 
-    this.JobContainer.innerHTML = /*html*/ `
-          <div
-        class="shadow-blue-gray-900/5 relative flex h-[calc(100vh-2rem)] w-full max-w-[20rem] flex-col  bg-white bg-clip-border p-4 text-black shadow-xl border-2 border-gray-300 rounded-3xl m-2"
-      >
-        <div class="mb-2 p-4">
-          <h5
-            class="text-blue-gray-900 block text-xl font-semibold leading-snug tracking-normal antialiased font-primary"
-          >
-            JobSection
-          </h5>
-        </div>
-        <nav
-          class="text-blue-gray-700 flex min-w-[240px] flex-col gap-1 p-2 font-sans text-base font-normal"
-        >
-          <!-- Existing Sidebar Content -->
-          <!-- ... -->
-
-          <!-- New Buttons -->
-          <div class="flex flex-col gap-2 mt-4">
-            <button id = "create-jobs"
-              class=" select-none rounded-lg  py-3 px-6 text-center align-middle font-primary text-xs font-bold uppercase text-white shadow-lg shadow-gray-900/10 transition-all hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none disabled:pointer-events-none disabled:opacity-100 disabled:shadow-none bg-primary"
-              type="button"
-              
-            >
-              Create Jobs
-            </button>
-            <button
-              class="select-none rounded-lg bg-gray-900 py-3 px-6 text-center align-middle font-primary text-xs font-bold uppercase text-white shadow-md shadow-gray-900/10 transition-all hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-              type="button"
-              data-dialog-target="button-two-dialog"
-            >
-              Browse Jobs
-            </button>
-          </div>
-        </nav>
-      </div>
-`;
+    if (this.JobContainer) {
+      this.JobContainer.innerHTML = jobSideBar();
+    }
   }
-
-  //create list of jobs
 }
 
-class JobPostManager {
+export class JobPostManager {
   private jobSectionMainContainer!: HTMLDivElement;
   private jobSectionFilter!: HTMLDivElement;
   private jobSectionJobList!: HTMLDivElement;
+  private jobApplyModal!: HTMLDivElement;
   private jobLists: Job[] = [];
+  val: number = 1;
 
   constructor() {
     this.jobSectionMainContainer = document.querySelector(
@@ -354,24 +262,52 @@ class JobPostManager {
     this.jobSectionJobList = document.querySelector(
       "#jobs-section__joblist",
     ) as HTMLDivElement;
+    this.jobApplyModal = document.createElement("div");
 
-    this.createJobFilter();
     this.init();
-    this.addEventListener();
   }
 
   private async init() {
     try {
       await this.fetchJobList();
       this.createJobList();
-    } catch (error) {
-      console.error("Error initializing JobPostManager:", error);
+    } catch (error: any) {
+      customToast("Server Error");
     }
   }
 
-  private async fetchJobList() {
-    `came to fetch the list`;
+  getSearchResult(title: string) {
+    this.setJobBySearch(title);
+  }
 
+  async setJobBySearch(query: string) {
+    try {
+      const queryParams = new URLSearchParams({
+        title: query,
+      });
+      console.log(`params is`, queryParams);
+
+      console.log(`${serverUrl}/jobs/search?${queryParams.toString()}`);
+
+      const response = await axios(
+        `${serverUrl}/jobs/search?${queryParams.toString()}`,
+        {
+          headers: {
+            Authorization: accessToken ? `Bearer ${accessToken}` : "",
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      this.jobLists = response.data;
+      this.createJobList();
+    } catch (error) {}
+  }
+  setJobByFilter(jobList: Job[]) {
+    this.jobLists = jobList;
+  }
+
+  private async fetchJobList() {
     try {
       const response = await axios.get(`${serverUrl}/jobs`, {
         headers: {
@@ -384,49 +320,126 @@ class JobPostManager {
     }
   }
 
-  private createJobFilter() {}
+  private createJobApplyModal(job: Job) {
+    this.jobApplyModal.className =
+      "fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center hidden";
+    this.jobApplyModal.id = "job-apply-modal";
+    this.jobApplyModal.innerHTML = jobApplyModal(job);
 
-  private createJobList() {
+    document.body.appendChild(this.jobApplyModal);
+  }
+
+  showJobModal(e: Event) {
+    console.log(`came to show job modal`);
+
+    const target = e.target as HTMLButtonElement;
+    let job;
+    if (target.classList.contains("job-apply-btn")) {
+      const button = target.closest(".job-apply-btn") as HTMLButtonElement;
+      const jobId = button.dataset.jobId;
+      const buttonId = button.id;
+
+      job = this.jobLists.find((job) => {
+        return job.jobsTableId == parseInt(jobId!);
+      });
+    }
+
+    this.createJobApplyModal(job!);
+
+    this.jobApplyModal.classList.remove("hidden");
+
+    //close the modal if close button clicked
+    document
+      .querySelector("#job-apply-close-btn")!
+      .addEventListener("click", (event) => {
+        //close the modal
+        this.jobApplyModal.classList.add("hidden");
+      });
+
+    //submit the form
+    this.handleJobSumitForm(job!);
+  }
+
+  async handleJobSumitForm(job: Job) {
+    const form = document.getElementById(
+      "job-application-form",
+    ) as HTMLFormElement;
+
+    const submitBtn = document.getElementById(
+      "job-apply-submit-Btn",
+    ) as HTMLButtonElement;
+
+    const fileInput = document.getElementById("resume") as HTMLInputElement;
+
+    submitBtn!.addEventListener("click", async () => {
+      const file = fileInput.files ? fileInput.files[0] : null;
+
+      if (!file) {
+        customToast("please select pdf");
+        return;
+      }
+      try {
+        const base64File = await this.convertToBase64(file);
+        const templateParams = {
+          to_email: job.email, // Replace with the actual recipient email
+          job_title: job.title,
+          job_description: job.description,
+          job_salary: job.salary,
+          job_experience: job.experienceLevel,
+          resume: base64File,
+        };
+
+        const response = await emailjs.send(
+          config.serviceId,
+          config.templateId,
+          templateParams,
+        );
+        console.log("SUCCESS!", response.status, response.text);
+        customToast("Your application has been submitted successfully!");
+        form.reset();
+      } catch (error: any) {
+        console.error("FAILED...", error);
+        customToast(error.text);
+      }
+    });
+  }
+
+  private convertToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
+  }
+
+  hideJobModal() {
+    //this.resetInitialField();
+    this.jobApplyModal.classList.add("hidden");
+  }
+
+  createJobList() {
     this.jobSectionJobList.innerHTML = "";
 
     this.jobLists.forEach((job, index) => {
       const jobPost = document.createElement("div");
       jobPost.innerHTML = this.createJobPost(job, index);
       jobPost.classList.add("w-4/5");
+
       this.jobSectionJobList.appendChild(jobPost);
     });
   }
 
   private createJobPost(job: Job, index: number): string {
-    return /*HTML*/ `
-    <div class="flex flex-col items-center justify-center overflow-hidden pt-2 sm:py-10">
- 
-          <div id="jobContent${index}" class="bg-white shadow-sm w-full max-w-4xl flex flex-col sm:flex-row gap-3 sm:items-center  justify-between px-5 py-4 rounded-3xl">
-            <div>
-              <span class="text-purple-800 text-sm font-primary">${job.categoryType}</span>
-              <h3 class="font-bold mt-px font-primary">${job.title}</h3>
-              <div class="flex items-center gap-3 mt-2">
-                <span class="bg-purple-100 text-purple-700 rounded-full px-3 py-1 text-sm">${job.employmentType}</span>
-                <span class="text-slate-600 text-sm flex gap-1 items-center"> <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>${job.location}</span>
-              </div>
-            </div>
-            <div>
-              <button class="bg-black text-white font-medium px-4 py-2 rounded-md flex gap-1 items-center font-primary">Apply Now <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-          </svg>
-          </svg>
-          </button>
-            </div>
-            </div>
-  
-    </div>
-    `;
+    return jobPost(job, index);
+  }
+  getJobSectionJobList(): HTMLDivElement {
+    return this.jobSectionJobList;
   }
 
-  private addEventListener() {}
+  getJobApplyModal(): HTMLDivElement {
+    return this.jobApplyModal;
+  }
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -434,7 +447,25 @@ document.addEventListener("DOMContentLoaded", async () => {
   navbar.render();
   navbar.highlightActivePage();
 
-  const jobManager = new JobManager("jobs-section__sidebar");
+  //init email js
+  emailjs.init(config.userId);
 
   const jobPostManager = new JobPostManager();
+
+  if (jobPostManager.getJobSectionJobList()) {
+    jobPostManager.getJobSectionJobList().addEventListener("click", (event) => {
+      const target = event.target as HTMLElement;
+      if (target.closest(".job-apply-btn")) {
+        jobPostManager.showJobModal(event);
+      }
+    });
+  }
+
+  jobPostManager.getJobApplyModal().addEventListener("click", (event) => {
+    if (event.target === jobPostManager.getJobApplyModal()) {
+      jobPostManager.hideJobModal();
+    }
+  });
+
+  const jobManager = new JobManager("jobs-section__sidebar");
 });

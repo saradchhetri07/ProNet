@@ -1,11 +1,11 @@
-import { connectRequest } from "./../../../../server/src/controllers/connection.controllers";
 import { Navbar } from "../../components/navbar";
 import { accessToken, serverUrl } from "../../constants/constant";
 import axios from "axios";
 import { ConnectRequest } from "../../interface/connectRequest";
 import { customToast } from "../../utils/toast";
+import { makeCard } from "./card";
 
-class NetworkManager {
+export class NetworkManager {
   private recommendationsContainer!: HTMLDivElement;
   private requestContainer!: HTMLDivElement;
   private requestConnect!: ConnectRequest[];
@@ -55,7 +55,6 @@ class NetworkManager {
 
       if (response.status == 202) {
         //create toast
-        `response is`, response;
 
         customToast(response.data.message);
         this.updatePost(requestId!);
@@ -125,6 +124,8 @@ class NetworkManager {
   }
 
   private createRecommendationContainer() {
+    console.log(`inside create recommendation container`);
+
     this.mainSectionRecommendationCard.innerHTML = "";
     this.recommendations.forEach((recommendation, index) => {
       const recommendationCard = document.createElement("div");
@@ -164,8 +165,9 @@ class NetworkManager {
           },
         },
       );
-      `response is`, response;
-      if (response.status == 202) {
+      console.log(`response is`, response);
+
+      if (response.status == 201) {
         //create toast
 
         customToast(response.data.message);
@@ -181,53 +183,9 @@ class NetworkManager {
     index: number,
     cardType: string,
   ) {
-    return `<div class="flex w-56 flex-col mt-6 text-gray-700 rounded-3xl bg-white shadow-md bg-clip-border">
-  <div
-    class="relative h-75 w-10/12 mt-5 mx-4 overflow-hidden text-white shadow-lg bg-clip-border rounded-2xl bg-blue-gray-500 shadow-blue-gray-500/40">
-    <img
-      src=${connectionRequest.profilePhotoUrl}
-      alt="card-image" />
-  </div>
-  <div class="p-6">
-    <h5 class="block mb-2 font-primary text-xl antialiased font-semibold leading-snug tracking-normal text-blue-gray-900 ">
-      ${connectionRequest.name}
-    </h5>
-    <p class="block text-base antialiased font-light leading-relaxed text-inherit font-primary">
-      ${connectionRequest.currentPosition}
-    </p>
-  </div>
-     <div class="p-4 pt-2 pr-6 flex justify-between gap-2">
-     ${
-       cardType === "request"
-         ? `
-              <button
-                id="accept-button-${index}"
-                class="font-primary font-bold text-center uppercase transition-all text-xs py-3 px-6 rounded-xl bg-black text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none"
-                data-request-id="${connectionRequest.userId}"
-                type="button">
-                Accept
-              </button>
-              <button
-                id="reject-button-${index}"
-                class="font-primary font-bold text-center uppercase transition-all text-xs py-3 px-6 rounded-xl bg-black text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none"
-                type="button"
-                data-request-id="${connectionRequest.userId}">
-                Reject
-              </button>
-            `
-         : `
-              <button
-                id="send-request-button-${index}"
-                class="font-primary font-bold text-center uppercase transition-all text-xs py-3 px-6 rounded-xl bg-primary text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-blue-500/20 focus:opacity-[0.85] focus:shadow-none"
-                type="button"
-                data-request-id="${connectionRequest.userId}">
-     ${connectionRequest.status == "confirmed" ? "Pending" : "send request"}
-              </button>
-            `
-     }
-  </div>
-</div>  `;
+    return makeCard(connectionRequest, index, cardType);
   }
+
   private async fetchRequest() {
     try {
       const response = await axios.get(
@@ -240,8 +198,6 @@ class NetworkManager {
       );
 
       this.requestConnect = response.data;
-
-      `gotten response of connect user is`, this.requestConnect;
     } catch (err: any) {
       throw new Error(err);
     }
@@ -249,7 +205,7 @@ class NetworkManager {
 
   private async fetchRecommendations() {
     try {
-      const response = await axios.get(
+      const userRecommendationInfo = await axios.get(
         `${serverUrl}/connect/userRecommendation`,
         {
           headers: {
@@ -258,16 +214,55 @@ class NetworkManager {
         },
       );
 
-      if (response.status === 200) {
-        this.recommendations = response.data;
-        `recommendations is`, this.recommendations;
+      if (userRecommendationInfo.data.length <= 2) {
+        const response = await axios.get(`${serverUrl}/connect/coldStart`, {
+          headers: {
+            Authorization: accessToken ? `Bearer ${accessToken}` : "",
+          },
+        });
+
+        if (response.status === 200) {
+          this.recommendations = response.data;
+          console.log(`data is`, response.data);
+        }
+      } else {
+        console.log(`data is`, userRecommendationInfo.data);
+
+        this.recommendations = userRecommendationInfo.data;
       }
     } catch (error) {
       throw new Error("failed to fetch recommendation");
     }
   }
-}
+  getUserSearchResult(name: string) {
+    this.setUserInfoBySearch(name);
+  }
 
+  async setUserInfoBySearch(name: string) {
+    try {
+      const queryParams = new URLSearchParams({
+        name: name,
+      });
+
+      console.log(`${serverUrl}/connect/search?${queryParams.toString()}`);
+
+      const response = await axios.get(
+        `${serverUrl}/connect/search?${queryParams.toString()}`,
+        {
+          headers: {
+            Authorization: accessToken ? `Bearer ${accessToken}` : "",
+          },
+        },
+      );
+      console.log(`response from server`, response);
+
+      this.recommendations = response.data;
+      console.log(`user recommendations is`, this.recommendations);
+
+      this.createRecommendationContainer();
+    } catch (error) {}
+  }
+}
 document.addEventListener("DOMContentLoaded", () => {
   const navbar = new Navbar("navbar-container");
   navbar.render();

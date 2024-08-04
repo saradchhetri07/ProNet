@@ -1,10 +1,16 @@
+import { myDetails } from "./../../constants/constant";
+import { ProfileDetailsInterface } from "../../interface/profileInterface";
 import axios from "axios";
 import { Navbar } from "../../components/navbar";
 import { accessToken, serverUrl } from "../../constants/constant";
 import { PostInterface } from "../../interface/feed";
 import { CommentInterface } from "../../interface/comments";
-import { myDetails } from "../../constants/constant";
 import { customToast } from "../../utils/toast";
+import { profileHead } from "./profileHead";
+import { editProfile } from "./editProfile";
+import { PostElement } from "../feed/postElement";
+import { editProfileBodySchema, validate } from "../../schema/job";
+import { CreatePost } from "./createPost";
 class ProfileManager {
   private postIds: string[] = [];
   private posts: PostInterface[] = [];
@@ -12,16 +18,39 @@ class ProfileManager {
   private profileHeadSection!: HTMLDivElement;
   private profileFeedSection!: HTMLDivElement;
   private profileEditModalContainer!: HTMLDivElement;
+  profileDetails!: ProfileDetailsInterface;
+
   constructor() {
     this.profileFeedSection = document.querySelector(
       "#profile-feed-container",
     )!;
     this.profileHeadSection = document.querySelector("#profile-head")!;
 
-    this.createProfileHead();
+    this.init();
     this.addPhotoChangeListeners(this.profileHeadSection, myDetails.myId!);
-    this.createEditProfileModal();
     // this.fetchUserDetails();
+  }
+  private async init() {
+    await this.fetchUserDetails();
+    this.createProfileHead();
+    this.createEditProfileModal();
+    await this.renderFeed();
+  }
+
+  private async fetchUserDetails() {
+    try {
+      const response = await axios.get(`${serverUrl}/profile`, {
+        headers: {
+          Authorization: accessToken ? `Bearer ${accessToken}` : "",
+        },
+      });
+      if (!response) {
+        throw new Error("Unavailable");
+      }
+      this.profileDetails = response.data[0];
+    } catch (error) {
+      return;
+    }
   }
 
   private addPhotoChangeListeners(
@@ -140,43 +169,7 @@ class ProfileManager {
   }
 
   createProfileHead() {
-    this.profileHeadSection.innerHTML = /*HTML*/ `
-        <div class="profile-section max-w-2xl mt-2 mx-auto bg-white shadow-lg rounded-2xl overflow-hidden">
-
-            <div class="cover-photo h-48 bg-gray-300 relative cursor-pointer">
-                <img src=${myDetails.myCoverPhotoUrl} alt="Cover Photo" class="w-full h-full object-cover">
-                <input type="file" id="cover-photo-input" class="hidden" accept="image/*" name="coverPhoto">
-            
-            <div class="absolute bottom-0 left-8 transform translate-y-1/2 cursor-pointer">
-              <img src=${myDetails.myProfilePhotoUrl} alt=${myDetails.myName}'s photo" class="w-32 h-32 rounded-full border-4 border-white">
-              <input type="file" id="profile-photo-input" class="hidden" accept="image/*" name="profilePhoto">
-            </div>
-
-      </div>
-
-    <!-- User Info and Buttons -->
-    <div class="p-4 pt-20 sm:p-6 sm:pt-20">
-      <div class="flex justify-between items-start">
-        <div>
-          <h1 class="text-2xl font-bold text-gray-900">${myDetails.myName}</h1>
-          <p class="text-gray-600">Software Engineer</p>
-          <p class="text-sm text-gray-500 mt-1">myDetails.location • myDetails.connections connections</p>
-        </div>
-        <div>
-          <button id="edit-profile" class="bg-primary text-white px-4 py-2 rounded-full font-semibold hover:bg-blue-700 transition duration-300 font-primary">Edit Profile</button>
-        </div>
-      </div>
-
-      <!-- Additional User Info -->
-      <div class="mt-4">
-        <p class="text-gray-700">myDetails.about</p>
-      </div>
-
-      <!-- Experience, Education, etc. can be added here -->
-
-    </div>
-  </div>
-      `;
+    this.profileHeadSection.innerHTML = profileHead(this.profileDetails);
   }
 
   createEditProfileModal() {
@@ -184,114 +177,33 @@ class ProfileManager {
     this.profileEditModalContainer.className =
       "fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center hidden";
     this.profileEditModalContainer.id = "create-job-modal";
-    this.profileEditModalContainer.innerHTML = /*HTML*/ `
-    <div class="bg-white p-6 rounded-lg w-full max-w-md h-[70vh] overflow-scroll hide-scrollbar">
-        <h2 class="text-2xl font-bold mb-4 font-primary">Edit Profile</h2>
-        <form>
-          <!-- Add your form fields here -->
-         
-              <div class="mb-4">
-              <label class="block text-gray-700 text-sm font-bold mb-2 font-primary" for="headline">
-                headline
-              </label>
-              <textarea class="input-field shadow appearance-none border-2 rounded w-full py-2 text-black leading-tight focus:outline-none focus:shadow-outline font-primary" id="headline" placeholder="headline" type="text" rows="2" > </textarea>
-             
-                <span id="headline-error" class="post-error text-red-500 text-xs italic font-primary"></span>
-            </div>
-
-            
-            <div class="mb-4">
-              <label class="block text-gray-700 text-sm font-bold mb-2 font-primary" for="summary">
-                Summary
-              </label>
-              <input class="input-field shadow appearance-none border-2 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline font-primary" id="summary" type="text" placeholder="summary">
-
-              <span id="summary-error" class="post-error text-red-500 text-xs italic font-primary"></span>
-            </div>
-         
-
-          <div class="mb-4">
-              <label class="block text-gray-700 text-sm font-bold mb-2 font-primary text-sm" for="Industry">
-                Industry
-              </label>
-              <select 
-                class="shadow appearance-none border-2 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline font-primary" 
-                id="Industry"
-              >
-                <option value="Engineering and Technology">Engineering and Technology</option>
-                <option value="Administrative and Office Support">Administrative and Office Support</option>
-                <option value="Healthcare and Medical">Healthcare and Medical</option>
-                <option value="Education and Training">Education and Training</option>
-                <option value="Finance and Accounting">Finance and Accounting</option>
-                <option value="Sales and Marketing">Sales and Marketing</option>
-                <option value="Legal and Compliance">Legal and Compliance</option>
-                <option value="Science and Research">Science and Research</option>
-              </select>
-    </div>
-
-        <div class="mb-4">
-  
-          <label class="block text-gray-700 text-sm font-bold mb-2 font-primary" for="experience">
-            Experience
-          </label>
-
-          <input class="input-field shadow appearance-none border-2 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline font-primary" id="Experience" type="text" placeholder="Experience">
-
-          <span id="Experience-error" class="error text-red-500 text-xs italic font-primary"></span>
-
-        </div>
-
-        <div class="mb-4">
-  
-        <label class="block text-gray-700 text-sm font-bold mb-2 font-primary" for="currentCompany">
-          current company
-        </label>
-
-        <input class="input-field shadow appearance-none border-2 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline font-primary" id="CurrentCompany" type="text" placeholder="current company">
-
-        <span id="CurrentCompany-error" class="error text-red-500 text-xs italic font-primary"></span>
-
-      </div>
-
-
-      <div class="mb-4">
-  
-      <label class="block text-gray-700 text-sm font-bold mb-2 font-primary" for="currentCompany">
-        current position
-      </label>
-
-      <input class="input-field shadow appearance-none border-2 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline font-primary" id="CurrentPosition" type="text" placeholder="current position">
-
-      <span id="CurrentPosition-error" class="error text-red-500 text-xs italic font-primary"></span>
-
-    </div>
-
-          <!-- Add more form fields as needed -->
-          <div class="flex items-center justify-between">
-            <button class="bg-primary hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline
-            font-primary
-            " type="button"
-            id="submitButton"
-            >
-              Submit
-            </button>
-            <button class="bg-black hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline font-primary" type="button" data-close-button>
-              Close
-            </button>
-          </div>
-        </form>
-      </div>`;
+    this.profileEditModalContainer.innerHTML = /*HTML*/ editProfile(
+      this.profileDetails,
+    );
 
     document.body.appendChild(this.profileEditModalContainer);
   }
 
   private showJobModal() {
-    `inside show job modal`;
     this.profileEditModalContainer.classList.remove("hidden");
   }
 
-  private hideJobModal() {
-    //this.resetInitialField();
+  private resetInitialField() {
+    const editForm = document.querySelector(
+      "#edit-profile-form",
+    ) as HTMLFormElement;
+    editForm.reset();
+
+    // Hide all error messages
+    const errorMessages = editForm.querySelectorAll(".edit-profile-errors");
+    errorMessages.forEach((errorMessage) => {
+      (errorMessage as HTMLElement).style.display = "none";
+    });
+  }
+  private hideJobModal(tag: string) {
+    if (tag === "close") {
+      this.resetInitialField();
+    }
     this.profileEditModalContainer.classList.add("hidden");
   }
 
@@ -347,7 +259,7 @@ class ProfileManager {
 
     this.profileEditModalContainer.addEventListener("click", (e) => {
       if (e.target === this.profileEditModalContainer) {
-        this.hideJobModal();
+        this.hideJobModal("close");
       }
     });
 
@@ -356,14 +268,15 @@ class ProfileManager {
     );
 
     if (closeButton) {
-      closeButton.addEventListener("click", () => this.hideJobModal());
+      closeButton.addEventListener("click", () => this.hideJobModal("close"));
     }
 
     const submitButton = document.querySelector("#submitButton");
 
-    submitButton?.addEventListener("click", () => this.editProfile());
+    submitButton?.addEventListener("click", () => this.submitEditedProfile());
   }
-  private async editProfile(): Promise<void> {
+
+  private async submitEditedProfile(): Promise<void> {
     const headline = (
       document.getElementById("headline") as HTMLTextAreaElement
     ).value;
@@ -380,6 +293,10 @@ class ProfileManager {
     const currentPosition = (
       document.getElementById("CurrentPosition") as HTMLInputElement
     ).value;
+    const editForm = document.getElementById(
+      "edit-form-form",
+    ) as HTMLFormElement;
+
     const profileData = {
       headline,
       summary,
@@ -388,7 +305,38 @@ class ProfileManager {
       currentCompany,
       currentPosition,
     };
-    console.log(`profile data is`, profileData);
+
+    const { errors } = validate(editProfileBodySchema, profileData);
+
+    errors?.forEach((error) => {
+      const errorElement = document.querySelector(
+        `#${error.error}-error`,
+      ) as HTMLElement;
+      errorElement!.innerHTML = error.message;
+      errorElement.style.fontFamily = "font-primary";
+    });
+
+    if (errors) {
+      return;
+    }
+    //submit the data
+    try {
+      const response = await axios.patch(
+        `${serverUrl}/profile/update`,
+        profileData,
+        {
+          headers: {
+            Authorization: accessToken ? `Bearer ${accessToken}` : "",
+          },
+        },
+      );
+      customToast(`${response.data}`);
+      if (response.status == 200) {
+        this.profileDetails = { ...this.profileDetails, ...profileData };
+        this.createProfileHead();
+        this.hideJobModal("close");
+      }
+    } catch (error) {}
   }
 
   private handleDocumentClick(event: MouseEvent): void {
@@ -493,6 +441,7 @@ class ProfileManager {
     await this.fetchPosts();
     this.getMyPosts("5");
     this.profileFeedSection.innerHTML = "";
+
     this.posts.forEach((post) => {
       const postElement = this.createPostElement(post);
       this.profileFeedSection.appendChild(postElement);
@@ -525,70 +474,10 @@ class ProfileManager {
     const postElement = document.createElement("div");
     postElement.className =
       "mt-4 flex-col bg-white shadow mb-4 max-w-2xl mx-auto border-2 border-gray-300 rounded-3xl overflow-hidden p-4";
-    postElement.innerHTML = /*html*/ `
-                <div class=" border-gray-300 overflow-hidden p-4">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                        <img class="w-12 h-12 rounded-full mr-4 font-primary" src="${post.profilePhotoUrl}" alt="${post.name}'s avatar">
-                        <div>
-                            <h3 class="font-semibold text-gray-900 font-primary">${post.name}</h3>
-                            <p class="text-sm text-gray-500 font-primary">Software Engineer</p>
-                            <p class="text-xs text-gray-400 font-primary">${this.formatTimestamp(post.createdAt!)} • <span class="text-gray-500">🌍</span></p>
-                        </div>
-                    </div>
-                    <div class="relative">
-                        <button class="text-gray-500 hover:text-gray-700 focus:outline-none more-options-button" data-post-id="${post.postId}">
-                            <i class="fas fa-ellipsis-h"></i>
-                        </button>
-
-                        <div class="absolute right mt-1 w-48 bg-white rounded-lg shadow-lg hidden more-options-menu">
-                            <div class="py-1">
-                                <button id= "delete-post-${post.postId}" class="px-4 py-2 text-sm text-gray-900 hover:bg-gray-100 delete-post-option font-primary"> Delete 
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="p-4">
-                <p class="text-gray-800 font-primary">${post.content}</p>
-            </div>
-            ${post.mediaUrl ? `<img class="w-full rounded-3xl" src="${post.mediaUrl}" alt="Post image">` : ""}
-
-            <div class="px-4 py-2 border-b border-gray-200">
-                <div class="flex items-center text-sm text-gray-500">
-                    <span class="mr-2 like-count font-primary">👍❤️ ${post.likeCount === null ? "0" : post.likeCount}
-                        likes</span>
-                    <span>${post.commentCount === null ? "0" : post.commentCount} comments
-                </div>
-            </div>
-
-            <div class="flex justify-evenly px-4 py-2">
-                <button class="like-button flex items-center text-gray-600 hover:bg-gray-100 px-2 py-1 rounded font-primary"
-                    data-post-id="${post.postId}">
-                    <i class="fas fa-thumbs-up"></i>
-                    Like
-                </button>
-                <button
-                    class="comment-button flex mr-2 items-center text-gray-600 hover:bg-gray-100 px-2 py-1 rounded font-primary"
-                    data-post-id="${post.postId}">
-                    <i class="fa-solid fa-comment"></i>
-                    Comment
-                </button>
-            </div>
-
-            <div class="comments-section hidden h-0 transition-all duration-75 ease-in-out overflow-hidden">
-                <div class="comments-container h-64 overflow-y-auto p-4">
-                    <!-- Comments will be dynamically added here -->
-                </div>
-                <div class="comment-input-container p-4 border-t mb-4">
-                    <input type="text" placeholder="Add a comment..." class="w-full p-2 border rounded-full mb-2">
-                </div>
-            </div>
-        `;
+    postElement.innerHTML = CreatePost(post, this.profileDetails);
     return postElement;
   }
+
   async fetchComments(): Promise<void> {
     try {
       this.setPostsIds();
@@ -621,6 +510,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   navbar.highlightActivePage();
 
   const profileManager = new ProfileManager();
-  await profileManager.renderFeed();
-  // await profileManager.fetchComments();
+
+  profileManager.attachButtonListeners();
 });

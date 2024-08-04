@@ -20,6 +20,13 @@
   flex-wrap: wrap;
   justify-content: center;
 }
+#main-section__recommendation__card {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
 
 #main-section {
   display: flex;

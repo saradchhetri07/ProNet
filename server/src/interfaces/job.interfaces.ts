@@ -18,3 +18,11 @@ export interface JobCategory {
   name: string;
   description?: string;
 }
+
+export interface JobFilter {
+  categoryType?: string;
+  location?: string;
+  salary?: string;
+  employmentType?: "Full-time" | "Part-time";
+  experienceLevel?: string;
+}
