@@ -95,11 +95,6 @@ export class ConnectionModel extends BaseModel {
     }
   }
 
-  static async rejectConnections(userId: string, status: string) {
-    try {
-    } catch (error) {}
-  }
-
   static async getRequestedUserInfo(userId: string) {
     // try {
     const requestUserId = await this.queryBuilder()
@@ -190,7 +185,48 @@ export class ConnectionModel extends BaseModel {
 
   static async getUserInfoBySearch(name: any, userId: string) {
     try {
-      const userInfo = await this.queryBuilder()
+      const connectionIds = await this.getConnections(userId);
+
+      const connectIdsArray: number[] = connectionIds!.map((id) => {
+        return parseInt(id, 10);
+      });
+
+      //get users ids whose are nt connected with you
+      const disjointConnectionsIds = await this.queryBuilder()
+        .table("users as u")
+        .select("u.id")
+        .whereNotIn("u.id", connectIdsArray)
+        .where("u.id", "!=", userId);
+
+      const disjointConnectionIdsArray = disjointConnectionsIds!.map(
+        (connection) => {
+          return parseInt(connection.id, 10);
+        }
+      );
+
+      //logged is user has sent request to
+      const pendingRequest = await this.queryBuilder()
+        .table("connections as c")
+        .select("c.connection_user_id as user_id")
+        .where("c.user_id", userId)
+        .whereIn("c.connection_user_id", disjointConnectionIdsArray);
+
+      console.log(`pending request`, pendingRequest);
+
+      const pendingRequestArray = pendingRequest.map((request) => {
+        return parseInt(request.userId);
+      });
+
+      const notFriendAndNotPendingRequest = disjointConnectionIdsArray.filter(
+        (id) => !pendingRequestArray.includes(id)
+      );
+      console.log(
+        `notFriendAndNotPendingRequest`,
+        notFriendAndNotPendingRequest
+      );
+
+      const recommendedUserInfo = await this.queryBuilder()
+        .distinct("u.id")
         .select(
           "u.id as userId",
           "u.name",
@@ -198,13 +234,16 @@ export class ConnectionModel extends BaseModel {
           "p.current_position"
         )
         .table("users as u")
-        .join("profiles as p", "p.userId", "u.id")
+        .leftJoin("profiles as p", "u.id", "p.userId")
+        .leftJoin("connections as c", "u.id", "c.connection_user_id")
+        .whereIn("u.id", notFriendAndNotPendingRequest)
         .where((builder) => {
           builder
             .andWhere("u.name", "ILIKE", `%${name}%`)
             .andWhere("u.id", "!=", userId);
         });
-      return userInfo;
+
+      return recommendedUserInfo;
     } catch (error: any) {
       if (error instanceof error) {
         throw new ServerError(`Internal Server Error`);
@@ -213,53 +252,121 @@ export class ConnectionModel extends BaseModel {
   }
   static async coldStartRecommendation(userId: string) {
     try {
-      const connectionUserIds = await this.queryBuilder()
-        .table("connections as c")
-        .select("c.connection_user_id")
-        .distinct()
-        .where((builder) => {
-          builder
-            .andWhere("c.user_id", "!=", userId)
-            .orWhere("c.user_id", "=", userId)
-            .andWhere("c.status", "pending");
-        });
+      // const connectionUserIds = await this.queryBuilder()
+      //   .table("connections as c")
+      //   .select("c.connection_user_id")
+      //   .distinct()
+      //   .where((builder) => {
+      //     builder
+      //       .andWhere("c.user_id", "!=", userId)
+      //       .orWhere("c.user_id", "=", userId)
+      //       .andWhere("c.status", "pending");
+      //   });
 
-      const connectionUserIdsArray = connectionUserIds.map(
-        (connectionUserId) => {
-          return connectionUserId.connectionUserId;
+      // const connectionUserIdsArray = connectionUserIds.map(
+      //   (connectionUserId) => {
+      //     return connectionUserId.connectionUserId;
+      //   }
+      // );
+      // console.log(`connection user id is`, connectionUserIdsArray);
+
+      // // const nonFriendConnectionsUser = await this.queryBuilder()
+      // //   .table("users as u")
+      // //   .select("u.id")
+      // //   .where("u.");
+
+      // console.log(connectionUserIds);
+
+      // const UserIds = await this.queryBuilder()
+      //   .select("u.id as userId")
+      //   .table("users as u")
+      //   .join("profiles as p", "p.userId", "u.id")
+      //   .where((builder) => {
+      //     builder.andWhere("u.id", "!=", userId);
+      //   });
+
+      // const recommendedUserIds = UserIds.map((user) => user.userId);
+
+      // console.log(`recommended User id`, recommendedUserIds);
+
+      // const recommendedUserInfo = await this.queryBuilder()
+      //   .distinct("u.id")
+      //   .select(
+      //     "u.id as userId",
+      //     "u.name",
+      //     "u.profile_photo_url",
+      //     "p.current_position",
+      //     "c.status"
+      //   )
+      //   .table("users as u")
+      //   .join("profiles as p", "p.userId", "u.id")
+      //   .join("connections as c", "u.id", "c.connection_user_id")
+      //   .whereIn("p.userId", recommendedUserIds);
+      const connectionIds = await this.getConnections(userId);
+
+      const connectIdsArray: number[] = connectionIds!.map((id) => {
+        return parseInt(id, 10);
+      });
+
+      //get users ids whose are nt connected with you
+      const disjointConnectionsIds = await this.queryBuilder()
+        .table("users as u")
+        .select("u.id")
+        .whereNotIn("u.id", connectIdsArray)
+        .where("u.id", "!=", userId);
+
+      const disjointConnectionIdsArray = disjointConnectionsIds!.map(
+        (connection) => {
+          return parseInt(connection.id, 10);
         }
       );
-      console.log(connectionUserIdsArray);
 
-      // const nonFriendConnectionsUser = await this.queryBuilder()
+      //logged is user has sent request to
+      const pendingRequest = await this.queryBuilder()
+        .table("connections as c")
+        .select("c.connection_user_id as user_id")
+        .where("c.user_id", userId)
+        .whereIn("c.connection_user_id", disjointConnectionIdsArray);
+
+      console.log(`pending request`, pendingRequest);
+
+      const pendingRequestArray = pendingRequest.map((request) => {
+        return parseInt(request.userId);
+      });
+
+      console.log(`disjoint request`, disjointConnectionIdsArray);
+      console.log(`pending request`, pendingRequestArray);
+
+      const notFriendAndNotPendingRequest = disjointConnectionIdsArray.filter(
+        (id) => !pendingRequestArray.includes(id)
+      );
+      console.log(
+        `notFriendAndNotPendingRequest`,
+        notFriendAndNotPendingRequest
+      );
+
+      // const recommendDisjointUserInfo = await this.queryBuilder()
       //   .table("users as u")
-      //   .select("u.id")
-      //   .where("u.");
-
-      console.log(connectionUserIds);
-
-      const UserIds = await this.queryBuilder()
-        .select("u.id as userId")
-        .table("users as u")
-        .join("profiles as p", "p.userId", "u.id")
-        .where((builder) => {
-          builder.andWhere("u.id", "!=", userId);
-        });
-
-      const recommendedUserIds = UserIds.map((user) => user.userId);
+      //   .select("u.id", "u.name", "c.status")
+      //   .join("connections as c", "u.id", "c.connection_user_id")
+      //   .whereIn("u.id", disjointConnectionIdsArray);
 
       const recommendedUserInfo = await this.queryBuilder()
+        .distinct("u.id")
         .select(
           "u.id as userId",
           "u.name",
           "u.profile_photo_url",
-          "p.current_position",
-          "c.status"
+          "p.current_position"
         )
         .table("users as u")
-        .join("profiles as p", "p.userId", "u.id")
-        .join("connections as c", "u.id", "c.connection_user_id")
-        .whereIn("p.userId", recommendedUserIds);
+        .leftJoin("profiles as p", "u.id", "p.userId")
+        .leftJoin("connections as c", "u.id", "c.connection_user_id")
+        .whereIn("u.id", notFriendAndNotPendingRequest);
+
+      console.log(recommendedUserInfo);
+
+      //confirm that the user id is not connected
 
       return recommendedUserInfo;
     } catch (error) {

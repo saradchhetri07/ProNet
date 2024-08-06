@@ -89,3 +89,34 @@
 .toastify.toast-custom {
   animation: slideInRight 0.3s ease-out;
 }
+
+@media screen and (max-width: 774px) {
+  body {
+    font-size: 14px;
+  }
+  .feed {
+    width: 75%;
+  }
+  .feed__post-form > div {
+    width: 75%;
+  }
+  #main-section {
+    display: flex;
+    flex-direction: column;
+  }
+  #main-section__request {
+    height: 100vh;
+    width: 100vw;
+  }
+  #main-section__recommendations {
+    width: 75vw;
+    overflow-y: scroll;
+  }
+  #main-section__request {
+    width: 75vw;
+  }
+  #main-section__request__card {
+    width: 75vw;
+    height: 100vh;
+  }
+}

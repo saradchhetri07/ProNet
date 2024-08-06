@@ -7,6 +7,7 @@ import {
   insertComment,
   getComments,
   getMyPosts,
+  deleteMyPosts,
 } from "../controllers/post.controllers";
 import { upload } from "../middlewares/multer.middlewares";
 import { requestWrapper } from "../utils/requestWrapper.utils";
@@ -30,6 +31,7 @@ router.post("/comment/:postId", requestWrapper(insertComment));
 router.get("/getPosts", requestWrapper(getPosts));
 router.get("/comments", requestWrapper(getComments));
 router.get("/myPosts", requestWrapper(getMyPosts));
+router.delete("/delete/:postId", requestWrapper(deleteMyPosts));
 // router.get("/getByRelevance",requestWrapper(getByEmail);
 
 export default router;

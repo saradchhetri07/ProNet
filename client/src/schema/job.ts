@@ -48,7 +48,8 @@ export const zodBodySchema = z
         invalid_type_error: "title must be a string",
       })
       .min(5, "Minimum 5 characters required"),
-    descriptions: z.string().min(50, "Minimum 50 characters accepted"),
+
+    description: z.string().min(1, "Descriptions cannot be empty"),
     location: z.string().min(1, "Location cannot be empty"),
     salary: z
       .number({ invalid_type_error: "salary must be number" })
@@ -70,8 +71,12 @@ export const zodBodySchema = z
       .optional(),
 
     applicationDeadline: z
-      .date({
-        required_error: "application deadline cannot be empty",
+      .string({
+        required_error: "Application deadline cannot be empty",
+      })
+      .transform((str) => new Date(str)) // Transform string to Date
+      .refine((date) => !isNaN(date.getTime()), {
+        message: "Invalid date format",
       })
       .refine((date) => isAfterToday(date), {
         message: "Application deadline must be after today.",

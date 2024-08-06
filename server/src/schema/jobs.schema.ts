@@ -19,12 +19,11 @@ export const createJobBodySchema = Joi.object({
   }),
 
   employmentType: Joi.string()
-    .valid("Full-time", "Part-time")
+    .valid("Full-Time", "Part-Time")
     .required()
     .messages({
       "any.required": "Employment type is required",
-      "any.only":
-        "Employment type must be one of 'Full-time', 'Part-time', 'Contract', 'Freelance'",
+      "any.only": "Employment type must be one of 'Full-time', 'Part-time'",
     }),
   requiredSkills: Joi.string().optional().allow("").messages({
     "string.base": "Required skills should be a string",
@@ -32,9 +31,7 @@ export const createJobBodySchema = Joi.object({
   experienceLevel: Joi.string().optional().messages({
     "string.base": "Experience level should be a string",
   }),
-  applicationDeadline: Joi.date().optional().messages({
-    "date.base": "Application deadline should be a valid date",
-  }),
+  applicationDeadline: Joi.string().required(),
 }).options({
   stripUnknown: true, // Remove unknown fields from the input data
 });

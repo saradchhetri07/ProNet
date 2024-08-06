@@ -202,6 +202,8 @@ export class NetworkManager {
         },
       );
 
+      console.log(`response from server`, response.data);
+
       this.requestConnect = response.data;
     } catch (err: any) {
       throw new Error(err);

@@ -31,3 +31,13 @@ export const getJobBySearch = async (title: any) => {
 
   return jobs;
 };
+
+export const deleteJobById = async (jobId: any, userId: string) => {
+  console.log(`jobb id isss`, jobId);
+
+  const isDelete = await JobModel.deleteJobById(jobId, userId);
+  if (isDelete == undefined) {
+    throw new ServerError("job deletion failed");
+  }
+  return isDelete;
+};

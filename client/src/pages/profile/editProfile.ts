@@ -1,6 +1,8 @@
 import { ProfileDetailsInterface } from "../../interface/profileInterface";
 
 export const editProfile = (profileDetails: ProfileDetailsInterface) => {
+  console.log(`gotten profile details is`, profileDetails);
+
   return /*HTML*/ `<div class="bg-white p-6 rounded-lg w-full max-w-md h-[70vh] overflow-scroll hide-scrollbar">
     <h2 class="text-2xl font-bold mb-4 font-primary">Edit Profile</h2>
     <form id="edit-profile-form">

@@ -9,13 +9,16 @@ export class JobModel extends BaseModel {
         ...JobBody,
         userId: userId,
       };
+
+      console.log(`job to insert`, jobToInsert);
+
       const jobCreated = await this.queryBuilder()
         .table("jobs_table")
         .insert(jobToInsert);
 
       return jobCreated;
-    } catch (error) {
-      throw new ServerError("Internal Server Error");
+    } catch (error: any) {
+      throw new ServerError(error);
     }
   }
 
@@ -38,7 +41,11 @@ export class JobModel extends BaseModel {
 
   static async getAllJobs() {
     try {
-      const jobs = await this.queryBuilder().table("jobs_table").select("*");
+      const jobs = await this.queryBuilder()
+        .table("jobs_table as jobs")
+        .join("users", "jobs.user_id", "users.id")
+        .select("jobs.*", "users.name", "users.email");
+
       return jobs;
     } catch (error) {
       if (error instanceof Error) {
@@ -108,16 +115,28 @@ export class JobModel extends BaseModel {
           // .andWhere("jobs.user_id", "!=", userId);
         });
 
-      // // .andWhere("jobs.experienceLevel", formData.experienceLevel)
-      // .andWhere("jobs.salary", ">=", salaryMin);
-      // .andWhere("jobs.salary", "<=", salaryMax);
-      // .andWhere("users.id", "!=", userId);
-
-      console.log(`jobs are`, jobs);
       return jobs;
     } catch (error) {
       console.log(`entered into error`);
 
+      if (error instanceof Error) {
+        throw new ServerError(error.message);
+      }
+    }
+  }
+
+  static async deleteJobById(jobId: string, userId: string) {
+    try {
+      console.log(`gotten job id is`, jobId);
+
+      const isDelete = await this.queryBuilder()
+        .table("jobs_table")
+        .where({ jobs_table_id: parseInt(jobId) })
+        .delete();
+
+      console.log(isDelete);
+      return isDelete;
+    } catch (error) {
       if (error instanceof Error) {
         throw new ServerError(error.message);
       }

@@ -38,7 +38,7 @@ export const postPostMedia = (
 export const insertLikes = async (postId: string, userId: string) => {
   const isLiked = await PostModel.insertLikes(postId, userId);
   if (!isLiked) {
-    throw new BadRequestError("Likes not created");
+    throw new BadRequestError("unliked");
   }
 };
 

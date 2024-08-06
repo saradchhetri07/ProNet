@@ -8,4 +8,5 @@ export interface PostInterface {
   name: string;
   postId: string;
   profilePhotoUrl?: string;
+  likedByCurrentUser: boolean;
 }

@@ -20,11 +20,6 @@ export class UserModel extends BaseModel {
         .insert(userToCreate)
         .table("users");
 
-      const profileToCreate = {
-        userId: userId,
-      };
-      await this.queryBuilder().table("profiles").insert(profileToCreate);
-
       return userId;
     } catch (error) {
       if (error instanceof Error) {

@@ -46,3 +46,37 @@
   height: 80vh;
   overflow-y: scroll;
 }
+
+#job-sidebar {
+  width: 23rem;
+  margin-left: 20%;
+}
+
+@media screen and (max-width: 1546px) {
+  body {
+    font-size: 14px;
+  }
+  #main-section {
+    width: 100%;
+  }
+  #jobs-section__sidebar {
+    width: 100vw;
+  }
+  #jobs-section__sidebar > div {
+    height: 100%;
+  }
+  #jobs-section {
+    display: flex;
+    flex-direction: column;
+  }
+  #jobs-section__maincontainer {
+    width: 100%;
+  }
+  #create-jobs {
+    width: 100%;
+  }
+  #job-sidebar {
+    margin-left: 0;
+    width: 100%;
+  }
+}

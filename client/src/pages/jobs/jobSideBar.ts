@@ -1,7 +1,7 @@
 export const jobSideBar = () => {
   return /*HTML*/ `
-  <div
-        class="shadow-blue-gray-900/5 relative flex h-[calc(100vh-2rem)] w-full max-w-[20rem] flex-col  bg-white bg-clip-border p-4 text-black shadow-xl border-2 border-gray-300 rounded-3xl m-2">
+  <div id="job-sidebar"
+        class="shadow-blue-gray-900/5 relative flex h-[calc(100vh-2rem)]  flex-col  bg-white bg-clip-border p-4 text-black shadow-xl border-2 border-gray-300 rounded-3xl m-2">
         <div class="mb-2 p-4">
           <h5
             class="text-blue-gray-900 block text-xl font-semibold leading-snug tracking-normal antialiased font-primary"
@@ -18,18 +18,11 @@ export const jobSideBar = () => {
           <!-- New Buttons -->
           <div class="flex flex-col gap-2 mt-4">
             <button id = "create-jobs"
-              class=" select-none rounded-lg  py-3 px-6 text-center align-middle font-primary text-xs font-bold uppercase text-white shadow-lg shadow-gray-900/10 transition-all hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none disabled:pointer-events-none disabled:opacity-100 disabled:shadow-none bg-primary"
+              class=" select-none rounded-lg  py-3 px-6 text-center align-middle font-primary text-xs font-bold uppercase text-white shadow-lg shadow-gray-900/10 transition-all hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none disabled:pointer-events-none disabled:opacity-100 disabled:shadow-none bg-primary w-9/12"
               type="button"
               
             >
               Create Jobs
-            </button>
-            <button
-              class="select-none rounded-lg bg-gray-900 py-3 px-6 text-center align-middle font-primary text-xs font-bold uppercase text-white shadow-md shadow-gray-900/10 transition-all hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-              type="button"
-              data-dialog-target="button-two-dialog"
-            >
-              Browse Jobs
             </button>
           </div>
         </nav>

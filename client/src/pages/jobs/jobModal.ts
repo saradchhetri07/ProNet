@@ -1,7 +1,7 @@
 export const jobModal = () => {
   return /*HTML*/ `<div class="bg-white p-6 rounded-lg w-full max-w-md">
   <h2 class="text-2xl font-bold mb-4 font-primary">Create New Job</h2>
-  <form>
+  <form id="job-modal-form">
     <!-- Add your form fields here -->
     <div class = "flex gap-2">
         <div class="mb-4">
@@ -10,7 +10,7 @@ export const jobModal = () => {
         </label>
         <input class="input-field shadow appearance-none border-2 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline font-primary" id="title" type="text" placeholder="Job Title">
         
-          <span id="title-error" class="post-error text-red-500 text-xs italic font-primary"></span>
+          <span id="title-error" class="post-error text-red-500 text-xs italic font-primary" data-error-type='title'></span>
 
       </div>
 
@@ -20,7 +20,7 @@ export const jobModal = () => {
         </label>
         <input class="input-field shadow appearance-none border-2 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline font-primary" id="location" type="text" placeholder="Location">
 
-        <span id="location-error" class="post-error text-red-500 text-xs italic font-primary"></span>
+        <span id="location-error" class="post-error text-red-500 text-xs italic font-primary" data-error-type='location'></span>
       </div>
     </div>
    
@@ -49,7 +49,7 @@ export const jobModal = () => {
       </div>
       
     </div>
-    <span id="salary-error" class="post-error text-red-500 text-xs italic font-primary error"></span>
+    <span id="salary-error" class="post-error text-red-500 text-xs italic font-primary error" data-error-type='salary'></span>
 
     <div class="mb-4">
     <label class="block text-gray-700 text-sm font-bold mb-2 font-primary text-sm" for="categoryType">
@@ -81,18 +81,28 @@ id="requiredSkills"
 placeholder="Required Skills"
 rows="2" 
 ></textarea>
-<span id="requiredSkills-error" class="post-error error text-red-500 text-xs italic font-primary"></span>
+<span id="requiredSkills-error" class="post-error error text-red-500 text-xs italic font-primary" data-error-type='requiredSkills'></span>
 </div>
 
     <div class="mb-4">
 
-    <label class="block text-gray-700 text-sm font-bold mb-2 font-primary" for="experienceLevel">
-      Experience Level
-    </label>
+        <label class="block text-gray-700 text-sm font-bold mb-2 font-primary text-sm" for="experienceLevel">
+        Experience Label
+      </label>
+      <select 
+        class="shadow appearance-none border-2 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline font-primary" 
+        id="experienceLevel"
+      >
+        <option value="Intern">Intern</option>
+        <option value="Junior">Junior</option>
+        <option value="Associate">Associate</option>
+        <option value="Senior Level">Senior Level</option>
+        <option value="Team Lead">Team Lead</option>
+        
+      </select>
 
-    <input class="input-field shadow appearance-none border-2 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline font-primary" id="experienceLevel" type="text" placeholder="Experience Level">
 
-    <span id="experienceLevel-error" class="error text-red-500 text-xs italic font-primary"></span>
+    <span id="experienceLevel-error" class="error text-red-500 text-xs italic font-primary" data-error-type='experienceLevel'>
 
   </div>
 
@@ -101,7 +111,7 @@ rows="2"
     Application Deadline
   </label>
   <input class="input-field shadow appearance-none border-2 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline font-primary" id="applicationDeadline" type="text" placeholder="Enter date in YYYY-MM-DD format">
-  <span id="applicationDeadline-error" class="post-error text-red-500 text-xs italic font-primary error"></span>
+  <span id="applicationDeadline-error" class="post-error text-red-500 text-xs italic font-primary error" data-error-type="applicationDeadline"></span>
 </div>
 
 

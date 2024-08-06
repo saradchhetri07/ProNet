@@ -11,6 +11,9 @@ import { editProfile } from "./editProfile";
 import { PostElement } from "../feed/postElement";
 import { editProfileBodySchema, validate } from "../../schema/job";
 import { CreatePost } from "./createPost";
+import { removeQuote } from "../../utils/remoteQuote";
+import { getCurrentDate } from "../../utils/currentDate";
+
 class ProfileManager {
   private postIds: string[] = [];
   private posts: PostInterface[] = [];
@@ -19,15 +22,15 @@ class ProfileManager {
   private profileFeedSection!: HTMLDivElement;
   private profileEditModalContainer!: HTMLDivElement;
   profileDetails!: ProfileDetailsInterface;
+  profileFound: boolean = true;
 
   constructor() {
-    this.init();
     this.profileFeedSection = document.querySelector(
       "#profile-feed-container",
     )!;
     this.profileHeadSection = document.querySelector("#profile-head")!;
+    this.init();
 
-    this.addPhotoChangeListeners(this.profileHeadSection, myDetails.myId!);
     // this.fetchUserDetails();
   }
 
@@ -36,6 +39,8 @@ class ProfileManager {
     this.createProfileHead();
     this.createEditProfileModal();
     await this.renderFeed();
+    await this.fetchComments();
+    this.addPhotoChangeListeners(this.profileHeadSection, myDetails.myId!);
   }
 
   private async fetchUserDetails() {
@@ -45,12 +50,23 @@ class ProfileManager {
           Authorization: accessToken ? `Bearer ${accessToken}` : "",
         },
       });
-      if (!response) {
-        throw new Error("Unavailable");
-      }
+
       this.profileDetails = response.data[0];
-    } catch (error) {
-      return;
+    } catch (error: any) {
+      customToast(error.response.data.message);
+
+      if (error.response.status == 404) {
+        this.profileFound = false;
+        this.profileDetails = {
+          currentCompany: "",
+          currentPosition: "",
+          experience: "",
+          headline: "",
+          industry: "",
+          summary: "",
+        };
+      }
+      this.createEditProfileModal();
     }
   }
 
@@ -58,8 +74,6 @@ class ProfileManager {
     profileSection: HTMLElement,
     userId: string,
   ): void {
-    console.log(`came to add photo change`);
-
     const coverPhotoArea = profileSection.querySelector(
       ".cover-photo",
     ) as HTMLElement;
@@ -191,23 +205,7 @@ class ProfileManager {
     this.profileEditModalContainer.classList.remove("hidden");
   }
 
-  private resetInitialField() {
-    const editForm = document.querySelector(
-      "#edit-profile-form",
-    ) as HTMLFormElement;
-    editForm.reset();
-
-    // Hide all error messages
-    const errorMessages = editForm.querySelectorAll(".edit-profile-errors");
-    errorMessages.forEach((errorMessage) => {
-      (errorMessage as HTMLElement).style.display = "none";
-    });
-  }
-
   private hideJobModal(tag: string) {
-    if (tag === "close") {
-      this.resetInitialField();
-    }
     this.profileEditModalContainer.classList.add("hidden");
   }
 
@@ -217,7 +215,6 @@ class ProfileManager {
       const response = await axios.get(`${serverUrl}/posts/myPosts`, {
         headers: {
           Authorization: accessToken ? `Bearer ${accessToken}` : "",
-          "Content-Type": "multipart/form-data",
         },
       });
 
@@ -226,9 +223,10 @@ class ProfileManager {
       }
 
       this.posts = response.data;
-      this.getMyPosts("5");
-    } catch (error) {
-      return;
+      this.getMyPosts(removeQuote(myDetails.myId!));
+      console.log(`my ports are`, this.posts);
+    } catch (error: any) {
+      customToast(error.response.data.message);
     }
   }
 
@@ -238,8 +236,9 @@ class ProfileManager {
     likeButtons.forEach((button) => {
       button.addEventListener("click", () => {
         const icon = button.querySelector("i");
+        const postId = button.getAttribute("data-post-id");
         if (icon) {
-          this.toggleLike(icon);
+          this.toggleLike(icon, postId!);
         }
       });
     });
@@ -255,7 +254,36 @@ class ProfileManager {
       });
     });
 
-    document.addEventListener("click", this.handleDocumentClick.bind(this));
+    const inputFields =
+      this.profileFeedSection.querySelectorAll(".comment-input");
+
+    inputFields.forEach((input) => {
+      const inputElement = input as HTMLInputElement;
+      input.addEventListener("keydown", (event: Event) => {
+        const keyboardEvent = event as KeyboardEvent;
+        const postId = input.getAttribute("data-post-id");
+
+        if (keyboardEvent.key === "Enter") {
+          // Prevent the default action (if any)
+          keyboardEvent.preventDefault();
+          const commentData = {
+            profilePhotoUrl: removeQuote(myDetails.myProfilePhotoUrl),
+            name: myDetails.myName,
+            content: inputElement.value,
+            postId: input.getAttribute("data-post-id"),
+            commentDate: getCurrentDate(),
+          };
+
+          this.comments.push(commentData);
+          this.populateComments(postId as string);
+          this.insertComments(commentData);
+          inputElement.value = "";
+          this.incrementCommentValue(postId as string);
+        }
+      });
+    });
+
+    // document.addEventListener("click", this.handleDocumentClick.bind(this));
 
     const editProfileButton = document.querySelector("#edit-profile");
 
@@ -278,30 +306,101 @@ class ProfileManager {
       closeButton.addEventListener("click", () => this.hideJobModal("close"));
     }
 
-    const submitButton = document.querySelector("#submitButton");
+    const submitButton =
+      this.profileEditModalContainer.querySelector("#submitButton");
 
-    submitButton?.addEventListener("click", () => this.submitEditedProfile());
+    if (submitButton) {
+      console.log(`inside submit button`, submitButton);
+
+      submitButton.addEventListener("click", () => {
+        this.submitEditedProfile();
+      });
+    }
+
+    const iFields = document.querySelectorAll(".iFields");
+    iFields.forEach((iFields) => {
+      iFields.addEventListener("click", (event) => {
+        const iPostId = iFields.getAttribute("data-post-id");
+        this.handleDocumentClick(event as MouseEvent, iPostId!);
+      });
+    });
+  }
+
+  private async incrementCommentValue(postId: string) {
+    const commentCountElement = document.getElementById(
+      `comment-count-${postId}`,
+    );
+
+    if (commentCountElement) {
+      // Extract the current count from the span text content
+      const currentCount = parseInt(
+        commentCountElement.textContent!.split(" ")[0],
+        10,
+      );
+
+      // Increment the count
+      const newCount = currentCount + 1;
+
+      // Update the span with the new count
+      commentCountElement.textContent = `${newCount} comments`;
+    }
+  }
+
+  async insertComments(commentData: CommentInterface) {
+    try {
+      const content = {
+        content: commentData.content,
+      };
+      const response = await axios.post(
+        `${serverUrl}/posts/comment/${commentData.postId!}`,
+        content,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      );
+      customToast(response.data.message);
+    } catch (error: any) {
+      customToast(error);
+    }
   }
 
   private async submitEditedProfile(): Promise<void> {
+    console.log(`came inside submit edit profile`);
+
     const headline = (
-      document.getElementById("headline") as HTMLTextAreaElement
+      this.profileEditModalContainer.querySelector(
+        "#headline",
+      ) as HTMLTextAreaElement
     ).value;
-    const summary = (document.getElementById("summary") as HTMLInputElement)
-      .value;
-    const industry = (document.getElementById("Industry") as HTMLInputElement)
-      .value;
+    const summary = (
+      this.profileEditModalContainer.querySelector(
+        "#summary",
+      ) as HTMLInputElement
+    ).value;
+    const industry = (
+      this.profileEditModalContainer.querySelector(
+        "#Industry",
+      ) as HTMLInputElement
+    ).value;
     const experience = (
-      document.getElementById("Experience") as HTMLInputElement
+      this.profileEditModalContainer.querySelector(
+        "#Experience",
+      ) as HTMLInputElement
     ).value;
     const currentCompany = (
-      document.getElementById("CurrentCompany") as HTMLInputElement
+      this.profileEditModalContainer.querySelector(
+        "#CurrentCompany",
+      ) as HTMLInputElement
     ).value;
     const currentPosition = (
-      document.getElementById("CurrentPosition") as HTMLInputElement
+      this.profileEditModalContainer.querySelector(
+        "#CurrentPosition",
+      ) as HTMLInputElement
     ).value;
-    const editForm = document.getElementById(
-      "edit-form-form",
+    const editForm = this.profileEditModalContainer.querySelector(
+      "#edit-form-form",
     ) as HTMLFormElement;
 
     const profileData = {
@@ -312,6 +411,8 @@ class ProfileManager {
       currentCompany,
       currentPosition,
     };
+
+    console.log(`profile details is`, profileData);
 
     const { errors } = validate(editProfileBodySchema, profileData);
 
@@ -328,25 +429,48 @@ class ProfileManager {
     }
     //submit the data
     try {
-      const response = await axios.patch(
-        `${serverUrl}/profile/update`,
-        profileData,
-        {
-          headers: {
-            Authorization: accessToken ? `Bearer ${accessToken}` : "",
+      if (this.profileFound) {
+        const response = await axios.patch(
+          `${serverUrl}/profile/update`,
+          profileData,
+          {
+            headers: {
+              Authorization: accessToken ? `Bearer ${accessToken}` : "",
+            },
           },
-        },
-      );
-      customToast(`${response.data}`);
-      if (response.status == 200) {
-        this.profileDetails = { ...this.profileDetails, ...profileData };
-        this.createProfileHead();
-        this.hideJobModal("close");
+        );
+        console.log(`response from server after updating`, response);
+
+        customToast(`${response.data}`);
+        if (response.status == 200) {
+          this.profileDetails = { ...this.profileDetails, ...profileData };
+          this.createProfileHead();
+          this.hideJobModal("close");
+        }
+      } else {
+        const response = await axios.post(
+          `${serverUrl}/profile/post`,
+          profileData,
+          {
+            headers: {
+              Authorization: accessToken ? `Bearer ${accessToken}` : "",
+            },
+          },
+        );
+        customToast(response.data);
+
+        if (response.status == 200) {
+          this.profileDetails = { ...this.profileDetails, ...profileData };
+          this.createProfileHead();
+          this.hideJobModal("close");
+        }
       }
-    } catch (error) {}
+    } catch (error: any) {
+      customToast(error.response.data.message);
+    }
   }
 
-  private handleDocumentClick(event: MouseEvent): void {
+  private handleDocumentClick(event: MouseEvent, postId: string): void {
     const target = event.target as HTMLElement;
 
     if (target.closest(".more-options-button")) {
@@ -371,8 +495,37 @@ class ProfileManager {
     });
   }
 
-  toggleLike(likeIcon: HTMLElement) {
+  async toggleLike(likeIcon: HTMLElement, postId: string) {
     likeIcon.classList.toggle("liked");
+
+    const likeCountElement = document.getElementById(`like-count-${postId}`);
+
+    if (likeCountElement) {
+      // Extract the current count from the span text content
+      let likeCount = parseInt(likeCountElement.textContent!.split(" ")[1], 10);
+      console.log(`like count is`, likeCount);
+
+      if (likeIcon.classList.contains("liked")) {
+        likeCount += 1;
+      } else {
+        likeCount -= 1;
+      }
+      likeCountElement.textContent = `👍❤️ ${likeCount} likes`;
+      try {
+        const response = await axios.post(
+          `${serverUrl}/posts/like/${postId}`,
+          {},
+          {
+            headers: {
+              Authorization: accessToken ? `Bearer ${accessToken}` : "",
+            },
+          },
+        );
+        customToast(response.data.message);
+      } catch (error: any) {
+        customToast(error.response.data.message);
+      }
+    }
   }
 
   private getMyPosts(userId: string) {
@@ -438,7 +591,7 @@ class ProfileManager {
     }
   }
 
-  setPostsIds() {
+  async setPostsIds() {
     this.posts.forEach((post) => {
       this.postIds.push(post.postId);
     });
@@ -446,7 +599,7 @@ class ProfileManager {
 
   async renderFeed() {
     await this.fetchPosts();
-    this.getMyPosts("5");
+    this.getMyPosts(removeQuote(myDetails.myId!));
     this.profileFeedSection.innerHTML = "";
 
     this.posts.forEach((post) => {
@@ -468,8 +621,27 @@ class ProfileManager {
 
   async handleDeletePost(postId: string) {
     try {
-      const response = await axios.delete(`${serverUrl}/`);
-    } catch (error) {}
+      console.log(`gotten post id is ${postId}`);
+
+      const response = await axios.delete(
+        `${serverUrl}/posts/delete/${postId}`,
+        {
+          headers: {
+            Authorization: accessToken ? `Bearer ${accessToken}` : "",
+            "Content-Type": "application/json", // Optional: specify content type if needed
+          },
+        },
+      );
+      if (response.status == 200) {
+        customToast(response.data.message);
+        this.posts = this.posts.filter((post) => post.postId !== postId);
+        setTimeout(() => {
+          this.renderFeed();
+        }, 2000);
+      }
+    } catch (error: any) {
+      customToast(error.response.statusText);
+    }
   }
 
   formatTimestamp(timestamp: string): string {
@@ -487,9 +659,10 @@ class ProfileManager {
 
   async fetchComments(): Promise<void> {
     try {
-      this.setPostsIds();
+      await this.setPostsIds();
 
       const postIdsParam = this.postIds.join(",");
+
       // Configure axios request with headers
       const response = await axios.get(
         `${serverUrl}/posts/comments?postIds=${postIdsParam}`,
@@ -504,6 +677,7 @@ class ProfileManager {
       if (!response) {
         throw new Error("Network response was not ok");
       }
+
       this.comments = response.data.comments;
     } catch (error) {
       return;

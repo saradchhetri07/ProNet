@@ -32,7 +32,7 @@ export const PostElement = (post: PostInterface) => {
                     <div class="flex justify-evenly px-4 py-2">
             <button class="like-button flex items-center text-gray-600 hover:bg-gray-100 px-2 py-1 rounded font-primary"
             data-post-id="${post.postId}">
-              <i class="fas fa-thumbs-up"></i>
+              <i class="fas fa-thumbs-up ${post.likedByCurrentUser !== null && post.likedByCurrentUser ? "liked" : ""}"></i>
               Like
             </button>
             <button class="comment-button flex mr-2 items-center text-gray-600 hover:bg-gray-100 px-2 py-1 rounded font-primary" 

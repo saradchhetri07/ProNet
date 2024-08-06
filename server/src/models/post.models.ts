@@ -118,6 +118,95 @@ export class PostModel extends BaseModel {
     }
   }
 
+  static async getMyPosts(userId: string) {
+    try {
+      // const likesCountSubquery = this.queryBuilder()
+      //   .table("likes as l")
+      //   .select("l.post_id")
+      //   .count("l.post_id as like_count")
+      //   .groupBy("l.post_id")
+      //   .as("likes_count"); // Alias for the subquery;
+
+      // const commentsSubQuery = this.queryBuilder()
+      //   .table("comments as c")
+      //   .select("c.post_id")
+      //   .count("c.post_id as comment_count")
+      //   .groupBy("c.post_id")
+      //   .as("comments_count");
+
+      // const posts = await this.queryBuilder()
+      //   .table("posts as p")
+      //   .innerJoin("users as u", "p.user_id", "u.id")
+      //   .innerJoin("posts_media as m", "p.post_id", "m.post_id")
+      //   .leftJoin(likesCountSubquery, "p.post_id", "likes_count.post_id")
+      //   .leftJoin(commentsSubQuery, "p.post_id", "comments_count.post_id")
+      //   .select(
+      //     "p.post_id",
+      //     "p.content",
+      //     "p.created_at",
+      //     "u.id as userId",
+      //     "u.name",
+      //     "u.profile_photo_url",
+      //     "m.media_url",
+      //     "likes_count.like_count",
+      //     "comments_count.comment_count"
+      //   )
+      //   .where("p.user_id", userId)
+      //   .orderBy("p.created_at", "asc");
+      const likesCountSubquery = this.queryBuilder()
+        .table("likes as l")
+        .select("l.post_id")
+        .count("l.post_id as like_count")
+        .groupBy("l.post_id")
+        .as("likes_count");
+
+      const commentsSubQuery = this.queryBuilder()
+        .table("comments as c")
+        .select("c.post_id")
+        .count("c.post_id as comment_count")
+        .groupBy("c.post_id")
+        .as("comments_count");
+
+      const currentUserLikesSubquery = this.queryBuilder()
+        .table("likes as cl")
+        .select("cl.post_id")
+        .where("cl.user_id", userId)
+        .groupBy("cl.post_id")
+        .as("current_user_likes");
+
+      const posts = await this.queryBuilder()
+        .table("posts as p")
+        .innerJoin("users as u", "p.user_id", "u.id")
+        .innerJoin("posts_media as m", "p.post_id", "m.post_id")
+        .leftJoin(likesCountSubquery, "p.post_id", "likes_count.post_id")
+        .leftJoin(commentsSubQuery, "p.post_id", "comments_count.post_id")
+        .leftJoin(
+          currentUserLikesSubquery,
+          "p.post_id",
+          "current_user_likes.post_id"
+        )
+        .select(
+          "p.post_id",
+          "p.content",
+          "p.created_at",
+          "u.id as userId",
+          "u.name",
+          "u.profile_photo_url",
+          "m.media_url",
+          "likes_count.like_count",
+          "comments_count.comment_count",
+          this.queryBuilder().raw(
+            "CASE WHEN current_user_likes.post_id IS NULL THEN FALSE ELSE TRUE END AS liked_by_current_user"
+          )
+        )
+        .where("p.user_id", userId)
+        .orderBy("p.created_at", "asc");
+      return posts;
+    } catch (error) {
+      throw new ServerError("Internal Server Error");
+    }
+  }
+
   static async createPostMedia(
     postId: string,
     mediaUrl: string,
@@ -219,46 +308,6 @@ export class PostModel extends BaseModel {
     }
   }
 
-  static async getMyPosts(userId: string) {
-    try {
-      const likesCountSubquery = this.queryBuilder()
-        .table("likes as l")
-        .select("l.post_id")
-        .count("l.post_id as like_count")
-        .groupBy("l.post_id")
-        .as("likes_count"); // Alias for the subquery;
-
-      const commentsSubQuery = this.queryBuilder()
-        .table("comments as c")
-        .select("c.post_id")
-        .count("c.post_id as comment_count")
-        .groupBy("c.post_id")
-        .as("comments_count");
-
-      const posts = await this.queryBuilder()
-        .table("posts as p")
-        .innerJoin("users as u", "p.user_id", "u.id")
-        .innerJoin("posts_media as m", "p.post_id", "m.post_id")
-        .leftJoin(likesCountSubquery, "p.post_id", "likes_count.post_id")
-        .leftJoin(commentsSubQuery, "p.post_id", "comments_count.post_id")
-        .select(
-          "p.post_id",
-          "p.content",
-          "p.created_at",
-          "u.id as userId",
-          "u.name",
-          "u.profile_photo_url",
-          "m.media_url",
-          "likes_count.like_count",
-          "comments_count.comment_count"
-        )
-        .where("p.user_id", userId)
-        .orderBy("p.created_at", "asc");
-      return posts;
-    } catch (error) {
-      throw new ServerError("Internal Server Error");
-    }
-  }
   static async deleteMyPost(userId: string, postId: string) {
     try {
       const isDeleted = await this.queryBuilder()

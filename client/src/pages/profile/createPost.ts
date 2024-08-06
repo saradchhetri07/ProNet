@@ -18,10 +18,11 @@ export const CreatePost = (
       </div>
       <div class="relative">
           <button class="text-gray-500 hover:text-gray-700 focus:outline-none more-options-button" data-post-id="${post.postId}">
-              <i class="fas fa-ellipsis-h"></i>
+              <i class="iFields fas fa-ellipsis-h" id="ellipse-${post.postId}" 
+              data-post-id="${post.postId}"></i>
           </button>
 
-          <div class="absolute right mt-1 w-48 bg-white rounded-lg shadow-lg hidden more-options-menu">
+          <div class="absolute right mt-1 w-48 bg-white rounded-lg shadow-lg hidden relative  w-auto more-options-menu">
               <div class="py-1">
                   <button id= "delete-post-${post.postId}" class="px-4 py-2 text-sm text-gray-900 hover:bg-gray-100 delete-post-option font-primary"> Delete 
                   </button>
@@ -38,16 +39,16 @@ ${post.mediaUrl ? `<img class="w-full rounded-3xl" src="${post.mediaUrl}" alt="P
 
 <div class="px-4 py-2 border-b border-gray-200">
   <div class="flex items-center text-sm text-gray-500">
-      <span class="mr-2 like-count font-primary">👍❤️ ${post.likeCount === null ? "0" : post.likeCount}
+      <span id="like-count-${post.postId}" class="mr-2 like-count font-primary">👍❤️ ${post.likeCount === null ? "0" : post.likeCount}
           likes</span>
-      <span>${post.commentCount === null ? "0" : post.commentCount} comments
+      <span id="comment-count-${post.postId}">${post.commentCount === null ? "0" : post.commentCount} comments
   </div>
 </div>
 
 <div class="flex justify-evenly px-4 py-2">
   <button class="like-button flex items-center text-gray-600 hover:bg-gray-100 px-2 py-1 rounded font-primary"
       data-post-id="${post.postId}">
-      <i class="fas fa-thumbs-up"></i>
+      <i class="fas fa-thumbs-up ${post.likedByCurrentUser !== null && post.likedByCurrentUser ? "liked" : ""}"></i>
       Like
   </button>
   <button
@@ -63,7 +64,7 @@ ${post.mediaUrl ? `<img class="w-full rounded-3xl" src="${post.mediaUrl}" alt="P
       <!-- Comments will be dynamically added here -->
   </div>
   <div class="comment-input-container p-4 border-t mb-4">
-      <input type="text" placeholder="Add a comment..." class="w-full p-2 border rounded-full mb-2">
+      <input type="text" placeholder="Add a comment..." class="comment-input w-full p-2 border rounded-full mb-2" data-post-id="${post.postId}">
   </div>
-</div>;`; /*HTML*/
+</div>`; /*HTML*/
 };

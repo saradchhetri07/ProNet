@@ -8,5 +8,7 @@ export const isAfterToday = (date: Date): boolean => {
 
 export const convertToDate = (dataString: string) => {
   const date = new Date(dataString);
+  // const formattedDate = new Date(date);
+  // const finalDate = formattedDate.toISOString().split("T")[0];
   return date;
 };

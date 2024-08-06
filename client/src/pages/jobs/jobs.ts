@@ -1,14 +1,12 @@
-import { JobFilter } from "./../../../../server/src/interfaces/job.interfaces";
 import { Navbar } from "../../components/navbar";
 import axios from "axios";
-import { accessToken, serverUrl } from "../../constants/constant";
+import { accessToken, myDetails, serverUrl } from "../../constants/constant";
 import { validate, zodBodySchema } from "../../schema/job";
 import { convertToDate } from "../../utils/validateDate";
 import { Job } from "../../interface/job";
 import { customToast } from "../../utils/toast";
 import { jobSideBar } from "./jobSideBar";
 import { jobModal } from "./jobModal";
-import { jobApplication } from "./jobApplication";
 import { jobPost } from "./jobPost";
 import { jobApplyModal } from "./jobApply";
 import emailjs from "@emailjs/browser";
@@ -36,59 +34,87 @@ class JobManager {
   }
 
   async postJob() {
-    const title = (document.getElementById("title") as HTMLInputElement).value;
-    const location = (document.getElementById("location") as HTMLInputElement)
-      .value;
+    const title = (
+      this.JobSectionModalContainer.querySelector("#title") as HTMLInputElement
+    ).value;
+    const location = (
+      this.JobSectionModalContainer.querySelector(
+        "#location",
+      ) as HTMLInputElement
+    ).value;
 
-    const salary = (document.getElementById("salary") as HTMLInputElement)
-      .value;
+    const salary = (
+      this.JobSectionModalContainer.querySelector("#salary") as HTMLInputElement
+    ).value;
     const employmentType = (
-      document.getElementById("employmentType") as HTMLInputElement
+      this.JobSectionModalContainer.querySelector(
+        "#employmentType",
+      ) as HTMLInputElement
     ).value;
     const requiredSkills = (
-      document.getElementById("requiredSkills") as HTMLTextAreaElement
+      this.JobSectionModalContainer.querySelector(
+        "#requiredSkills",
+      ) as HTMLTextAreaElement
     ).value;
     const categoryType = (
-      document.getElementById("category") as HTMLTextAreaElement
+      this.JobSectionModalContainer.querySelector(
+        "#category",
+      ) as HTMLTextAreaElement
     ).value;
     const experienceLevel = (
-      document.getElementById("experienceLevel") as HTMLInputElement
+      this.JobSectionModalContainer.querySelector(
+        "#experienceLevel",
+      ) as HTMLInputElement
     ).value;
     const applicationDeadline = (
-      document.getElementById("applicationDeadline") as HTMLInputElement
+      this.JobSectionModalContainer.querySelector(
+        "#applicationDeadline",
+      ) as HTMLInputElement
     ).value as any;
     const descriptions = (
-      document.getElementById("descriptions") as HTMLTextAreaElement
+      this.JobSectionModalContainer.querySelector(
+        "#descriptions",
+      ) as HTMLTextAreaElement
     ).value;
 
     // Create the data object
-    const jobData = {
+    let jobData = {
       title,
       location,
-      salary,
+      salary: parseInt(salary, 10),
       employmentType,
       requiredSkills,
       categoryType,
       experienceLevel,
       applicationDeadline,
-      descriptions,
+      description: descriptions,
     };
-    jobData.applicationDeadline = convertToDate(applicationDeadline);
+
+    //clear if any existing error is preset
+
+    this.clearExisitingErrors();
 
     // Validate the data
     const { errors } = validate(zodBodySchema, jobData);
 
     errors?.forEach((error) => {
-      const errorElement = document.querySelector(
+      console.log(`error is`, error);
+
+      const errorElement = this.JobSectionModalContainer.querySelector(
         `#${error.error}-error`,
       ) as HTMLElement;
+
       errorElement!.innerHTML = error.message;
       errorElement.style.fontFamily = "font-primary";
     });
 
+    jobData.applicationDeadline = convertToDate(applicationDeadline);
+
     if (errors) {
       return;
     }
+
+    console.log(`job data is`, jobData);
 
     try {
       const response = await axios.post(`${serverUrl}/jobs`, jobData, {
@@ -97,17 +123,33 @@ class JobManager {
           "Content-Type": "application/json",
         },
       });
-    } catch (err) {
-      throw new Error(`Error posting job`);
+      if (response.status === 201) {
+        customToast(response.data.message);
+        this.hideJobModal();
+      }
+    } catch (error: any) {
+      console.log(`error form database is`, error);
+
+      customToast(error.response.message);
     }
   }
 
-  private addEventListener() {
-    this.submitButton = document.getElementById(
-      "submitButton",
-    ) as HTMLButtonElement;
+  private clearExisitingErrors() {
+    const errors =
+      this.JobSectionModalContainer.querySelectorAll(`.post-error`);
 
-    this.submitButton.addEventListener("click", () => this.postJob());
+    errors.forEach((error) => {
+      error!.innerHTML = "";
+    });
+  }
+
+  private addEventListener() {
+    const submitBtn =
+      this.JobSectionModalContainer.querySelector("#submitButton");
+
+    if (submitBtn) {
+      submitBtn!.addEventListener("click", () => this.postJob());
+    }
 
     this.createJobButton = document.getElementById(
       "create-jobs",
@@ -207,27 +249,17 @@ class JobManager {
   }
 
   private showJobModal() {
-    console.log(`came to show the job modal`);
-
     this.JobSectionModalContainer.classList.remove("hidden");
   }
 
   private hideJobModal() {
     //this.resetInitialField();
     this.JobSectionModalContainer.classList.add("hidden");
-  }
-
-  private resetInitialField() {
-    (document.getElementById("title") as HTMLInputElement).value = "";
-    (document.getElementById("location") as HTMLInputElement).value = "";
-    (document.getElementById("salary") as HTMLInputElement).value = "";
-    (document.getElementById("employmentType") as HTMLInputElement).value = "";
-    (document.getElementById("requiredSkills") as HTMLTextAreaElement).value =
-      "";
-    (document.getElementById("experienceLevel") as HTMLInputElement).value = "";
-    (document.getElementById("applicationDeadline") as HTMLInputElement).value =
-      "";
-    (document.getElementById("descriptions") as HTMLTextAreaElement).value = "";
+    const formElement = this.JobSectionModalContainer.querySelector(
+      "#job-modal-form",
+    ) as HTMLFormElement;
+    formElement.reset();
+    this.clearExisitingErrors();
   }
 
   private makeSideBar() {
@@ -293,7 +325,9 @@ export class JobPostManager {
 
       this.jobLists = response.data;
       this.createJobList();
-    } catch (error) {}
+    } catch (error) {
+      customToast("error occured");
+    }
   }
   setJobByFilter(jobList: Job[]) {
     this.jobLists = jobList;
@@ -341,7 +375,7 @@ export class JobPostManager {
     this.jobApplyModal.classList.remove("hidden");
 
     //close the modal if close button clicked
-    document
+    this.jobApplyModal
       .querySelector("#job-apply-close-btn")!
       .addEventListener("click", (event) => {
         //close the modal
@@ -357,28 +391,49 @@ export class JobPostManager {
       "job-application-form",
     ) as HTMLFormElement;
 
-    const submitBtn = document.getElementById(
-      "job-apply-submit-Btn",
+    form.addEventListener("submit", (event) => {
+      event.preventDefault(); // Prevent default form submission
+
+      // Replace 'YOUR_SERVICE_ID' and 'YOUR_TEMPLATE_ID' with your actual EmailJS service and template IDs
+      console.log(event);
+
+      emailjs.sendForm(config.serviceId, config.templateId, form).then(
+        (response) => {
+          console.log("SUCCESS!", response.status, response.text);
+        },
+        (error) => {
+          console.error("FAILED...", error);
+        },
+      );
+    });
+
+    const submitBtn = this.jobApplyModal.querySelector(
+      "#job-apply-submit-Btn",
     ) as HTMLButtonElement;
 
-    const fileInput = document.getElementById("resume") as HTMLInputElement;
+    const fileInput = this.jobApplyModal.querySelector(
+      "#resume",
+    ) as HTMLInputElement;
 
     submitBtn!.addEventListener("click", async () => {
       const file = fileInput.files ? fileInput.files[0] : null;
+
+      console.log(`file selected`, file);
 
       if (!file) {
         customToast("please select pdf");
         return;
       }
       try {
-        const base64File = await this.convertToBase64(file);
+        let base64File = await this.convertToBase64(file);
+
         const templateParams = {
+          from_name: myDetails.myName,
           to_email: job.email, // Replace with the actual recipient email
           job_title: job.title,
           job_description: job.description,
           job_salary: job.salary,
           job_experience: job.experienceLevel,
-          resume: base64File,
         };
 
         const response = await emailjs.send(
@@ -386,9 +441,10 @@ export class JobPostManager {
           config.templateId,
           templateParams,
         );
-        console.log("SUCCESS!", response.status, response.text);
+
         customToast("Your application has been submitted successfully!");
         form.reset();
+        this.hideJobModal();
       } catch (error: any) {
         console.error("FAILED...", error);
         customToast(error.text);
@@ -396,11 +452,16 @@ export class JobPostManager {
     });
   }
 
-  private convertToBase64(file: File): Promise<string> {
+  convertToBase64(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
+      reader.onload = () => {
+        const base64String = reader.result as string;
+        // Remove the data URL prefix (e.g., "data:application/pdf;base64,")
+        const base64Content = base64String.split(",")[1];
+        resolve(base64Content);
+      };
       reader.onerror = (error) => reject(error);
     });
   }
@@ -423,6 +484,33 @@ export class JobPostManager {
 
       this.jobSectionJobList.appendChild(jobPost);
     });
+    const deleteBtn =
+      this.jobSectionJobList.querySelectorAll(".delete-job-btn");
+
+    deleteBtn.forEach((btn) => {
+      const jobId = btn.getAttribute("data-job-id");
+      console.log(`jobId is`, jobId);
+      btn.addEventListener("click", () => this.deleteJob(jobId!));
+    });
+  }
+
+  private async deleteJob(jobId: string) {
+    try {
+      const response = await axios.delete(`${serverUrl}/jobs/del/${jobId}`, {
+        headers: {
+          Authorization: accessToken ? `Bearer ${accessToken}` : "",
+        },
+      });
+      if (response.status == 200) {
+        customToast(response.data.message);
+      }
+      this.jobLists = this.jobLists.filter(
+        (job) => job.jobsTableId != parseInt(jobId),
+      );
+      this.createJobList();
+    } catch (error: any) {
+      customToast(error.response.message.data);
+    }
   }
 
   private createJobPost(job: Job, index: number): string {

@@ -43,10 +43,7 @@ export class Navbar {
                 <i class="fas fa-briefcase"></i>
                 <span class="hidden md:inline font-primary">Jobs</span>
             </a>
-            <a href="/src/pages/messages/messages.html" class="nav-link" data-page="messages">
-                <i class="fas fa-envelope"></i>
-                <span class="hidden md:inline font-primary">Messages</span>
-            </a>
+
             <a href="/src/pages/profile/profile.html" class="nav-link" data-page="profile">
                 <i class="fas fa-user-circle text-xl"></i>
                 <span class="hidden md:inline font-primary">profile</span>

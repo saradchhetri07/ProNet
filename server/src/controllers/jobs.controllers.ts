@@ -9,8 +9,9 @@ export const postJobs = async (
   res: Response,
   next: NextFunction
 ) => {
-  `came to post jobs`;
   const userId = req.user!.id;
+  console.log(`came to post job`, req.body);
+
   await JobServices.postsJobs(req.body, userId);
 
   return res.status(HTTPStatusCodes.CREATED).send({ message: "job created" });
@@ -57,4 +58,13 @@ export const getJobBySearch = async (
 
   const jobs = await JobServices.getJobBySearch(title);
   return res.status(HTTPStatusCodes.OK).send(jobs);
+};
+
+export const deleteJobById = async (req: Request, res: Response) => {
+  const userId = req.user?.id;
+  const { jobId } = req.params;
+  console.log(`req params is`, jobId);
+
+  await JobServices.deleteJobById(jobId, userId!);
+  return res.status(HTTPStatusCodes.OK).send({ message: "Job deleted" });
 };

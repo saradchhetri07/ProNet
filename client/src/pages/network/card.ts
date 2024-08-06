@@ -5,11 +5,13 @@ export const makeCard = (
   index: number,
   cardType: string,
 ) => {
-    return /*HTML*/ `<div class="flex w-56 flex-col mt-6 text-gray-700 rounded-3xl bg-white shadow-md bg-clip-border">
+  console.log(connectionRequest.profilePhotoUrl);
+
+  return /*HTML*/ `<div class="flex w-56 flex-col mt-6 text-gray-700 rounded-3xl bg-white shadow-md bg-clip-border">
   <div
     class="relative h-75 w-10/12 mt-5 mx-4 overflow-hidden text-white shadow-lg bg-clip-border rounded-2xl bg-blue-gray-500 shadow-blue-gray-500/40">
     <img
-      src=${connectionRequest.profilePhotoUrl}
+      src=${connectionRequest.profilePhotoUrl !== "" ? connectionRequest.profilePhotoUrl : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"}
       alt="card-image" />
   </div>
   <div class="p-6">
@@ -17,7 +19,7 @@ export const makeCard = (
       ${connectionRequest.name}
     </h5>
     <p class="block text-base antialiased font-light leading-relaxed text-inherit font-primary">
-      ${connectionRequest.currentPosition}
+      ${connectionRequest.currentPosition !== null ? connectionRequest.currentPosition : ""}
     </p>
   </div>
      <div class="p-4 pt-2 pr-6 flex justify-between gap-2">
@@ -50,5 +52,5 @@ export const makeCard = (
             `
      }
   </div>
-</div> `
+</div> `;
 };

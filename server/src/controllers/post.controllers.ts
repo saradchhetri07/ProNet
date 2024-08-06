@@ -128,7 +128,7 @@ export const deleteMyPosts = async (
   next: NextFunction
 ) => {
   const userId = req.user!.id;
-  const { postId } = req.body;
+  const { postId } = req.params;
   await PostServices.deleteMyPost(userId, postId);
   return res.status(HTTPStatusCodes.OK).send({ message: "post deleted" });
 };

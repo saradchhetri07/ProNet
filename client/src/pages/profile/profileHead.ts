@@ -28,7 +28,7 @@ export const profileHead = (profileDetails: ProfileDetailsInterface) => {
       <div class="flex justify-between items-start">
         <div>
           <h1 class="text-2xl font-bold text-gray-900">${myDetails.myName}</h1>
-          <p class="text-gray-600">${profileDetails.headline}</p>
+          <p class="text-gray-600">${profileDetails.headline !== null ? profileDetails.headline : ""}</p>
           <p class="text-sm text-gray-500 mt-1">${profileDetails.currentCompany !== null ? profileDetails.currentCompany : ""}</p>
         </div>
         <div>

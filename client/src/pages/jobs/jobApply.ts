@@ -6,7 +6,7 @@ export const jobApplyModal = (job: Job) => {
   return /*HTML*/ `
   <div class="bg-white p-6 rounded-lg w-full max-w-md">
   <h2 class="text-2xl font-bold mb-4 font-primary">Apply Job</h2>
-  <form id="job-application-form" onsubmit="return false;">
+  <form id="job-application-form" enctype="multipart/form-data" method="post" onsubmit="formSubmit()">
     <!-- Add your form fields here -->
     <div class = "flex gap-2">
         <div class="mb-4">
@@ -50,7 +50,7 @@ export const jobApplyModal = (job: Job) => {
                 <svg class="w-8 h-8" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                     <path d="M16.707 4.293l-3.388-3.388A1 1 0 0012.586 0H6a2 2 0 00-2 2v16a2 2 0 002 2h8a2 2 0 002-2V5.414a1 1 0 00-.293-.707zM14 16H6v-2h8v2zm0-4H6v-2h8v2zm-2-6V2.414L13.586 4H12z"></path>
                 </svg>
-                <input type="file" id="resume" name="resume" accept=".pdf" class="hidden" required>
+                <input type="file" id="resume" name="resume" accept=".pdf" class="hidden" name="my_file" required>
                 </label>
 
             </div>

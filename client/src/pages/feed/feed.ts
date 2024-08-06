@@ -19,6 +19,7 @@ export class FeedManager {
   comments: CommentInterface[] = [];
   likeCount?: number;
   commentCount?: number;
+  imageDiv?: HTMLImageElement;
 
   constructor(containerId: string) {
     const container = document.getElementById(containerId) as HTMLDivElement;
@@ -28,6 +29,11 @@ export class FeedManager {
     }
     this.feedContainer = container;
     this.init();
+    this.imageDiv = document.getElementById("profileImage") as HTMLImageElement;
+    this.imageDiv.src =
+      removeQuote(myDetails.myProfilePhotoUrl) != null
+        ? removeQuote(myDetails.myProfilePhotoUrl)
+        : "../../assets/images/Profile Default Icon.svg";
   }
 
   private async init() {
@@ -37,6 +43,7 @@ export class FeedManager {
   async fetchPosts(): Promise<void> {
     try {
       // Configure axios request with headers
+      customToast("getting posts");
       const response = await axios.get(
         `${serverUrl}/posts/getPosts?sortPref=date`,
         {
@@ -155,8 +162,9 @@ export class FeedManager {
     likeButtons.forEach((button) => {
       button.addEventListener("click", () => {
         const icon = button.querySelector("i");
+        const postId = button.getAttribute("data-post-id");
         if (icon) {
-          this.toggleLike(icon);
+          this.toggleLike(icon, postId!);
         }
       });
     });
@@ -203,6 +211,7 @@ export class FeedManager {
       // console.log(`post data id is`, postId);
     });
   }
+
   private async incrementCommentValue(postId: string) {
     const commentCountElement = document.getElementById(
       `comment-count-${postId}`,
@@ -285,15 +294,35 @@ export class FeedManager {
     }
   }
 
-  toggleLike(likeIcon: HTMLElement) {
-    console.log(`came to toggle`);
-
+  async toggleLike(likeIcon: HTMLElement, postId: string) {
     likeIcon.classList.toggle("liked");
-    const postId = likeIcon.getAttribute("data-post-id");
-    console.log(`post id is`, postId);
 
-    if (likeIcon.classList.contains("liked")) {
-      this.changeLikeCount(postId as string, true);
+    const likeCountElement = document.getElementById(`like-count-${postId}`);
+
+    if (likeCountElement) {
+      // Extract the current count from the span text content
+      let likeCount = parseInt(likeCountElement.textContent!.split(" ")[1], 10);
+
+      if (likeIcon.classList.contains("liked")) {
+        likeCount += 1;
+      } else {
+        likeCount -= 1;
+      }
+      likeCountElement.textContent = `👍❤️ ${likeCount} likes`;
+      try {
+        const response = await axios.post(
+          `${serverUrl}/posts/like/${postId}`,
+          {},
+          {
+            headers: {
+              Authorization: accessToken ? `Bearer ${accessToken}` : "",
+            },
+          },
+        );
+        customToast(response.data.message);
+      } catch (error: any) {
+        customToast(error.response.data.message);
+      }
     }
   }
 }

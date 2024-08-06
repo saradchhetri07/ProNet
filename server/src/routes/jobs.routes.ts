@@ -8,7 +8,7 @@ import {
   getJobsByFilter,
   postJobs,
 } from "../controllers/jobs.controllers";
-import { getJobBySearch } from "../controllers/jobs.controllers";
+import { getJobBySearch, deleteJobById } from "../controllers/jobs.controllers";
 
 const router = express.Router();
 
@@ -16,10 +16,11 @@ router.use(authenticate);
 
 router.post(
   "/",
-  validateReqBody(createJobBodySchema),
+  // validateReqBody(createJobBodySchema),
   requestWrapper(postJobs)
 );
 router.get("/", requestWrapper(getAllJobs));
 router.get("/filter", requestWrapper(getJobsByFilter));
 router.get("/search", requestWrapper(getJobBySearch));
+router.delete("/del/:jobId", requestWrapper(deleteJobById));
 export default router;
